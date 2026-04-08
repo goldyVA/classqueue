@@ -1,471 +1,455 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.3">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class Help Queue</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F5F0; --surface: #FFFFFF; --border: rgba(0,0,0,0.10);
+    --border-strong: rgba(0,0,0,0.18); --text: #1A1917; --muted: #6B6860;
+    --accent: #2D5BE3; --accent-light: #EEF2FD; --accent-text: #1A3BB0;
+    --danger: #C0392B; --danger-light: #FEF0EE;
+    --success: #1A7A4A; --success-light: #EDFAF3;
+    --warn: #B85C00; --warn-light: #FEF7EE;
+    --radius: 10px; --radius-lg: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+  }
+  body {
+    font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text);
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 24px 16px 48px;
+  }
+  .header { text-align: center; margin-bottom: 28px; }
+  .header h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .header p  { font-size: 14px; color: var(--muted); }
+  .card {
+    background: var(--surface); border-radius: var(--radius-lg);
+    border: 0.5px solid var(--border-strong); padding: 24px;
+    box-shadow: var(--shadow); width: 100%; max-width: 460px; margin-bottom: 16px;
+  }
+  .card-label {
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px;
+  }
+  input[type="text"], input[type="password"] {
+    width: 100%; padding: 10px 14px; border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius); font-family: inherit; font-size: 15px;
+    color: var(--text); background: var(--bg); outline: none;
+    transition: border-color 0.15s; margin-bottom: 12px;
+  }
+  input:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px rgba(45,91,227,0.12); }
+  button {
+    font-family: inherit; font-size: 14px; font-weight: 500;
+    cursor: pointer; border-radius: var(--radius); padding: 10px 18px;
+    border: none; transition: opacity 0.15s, transform 0.1s;
+  }
+  button:active { transform: scale(0.97); }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: #fff; width: 100%; }
+  .btn-primary:hover:not(:disabled) { opacity: 0.88; }
+  .btn-danger { background: var(--danger-light); color: var(--danger); width: 100%; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 0.5px solid var(--border-strong); }
+  .btn-ghost:hover { background: var(--bg); }
+  .queue-item {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+    background: var(--bg); border-radius: var(--radius);
+    border: 0.5px solid var(--border); animation: slideIn 0.2s ease; margin-bottom: 8px;
+  }
+  @keyframes slideIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+  .queue-item.first { background: var(--accent-light); border-color: rgba(45,91,227,0.25); }
+  .q-num  { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); min-width:22px; }
+  .q-name { flex:1; font-weight:500; font-size:15px; }
+  .queue-item.first .q-name { color: var(--accent-text); }
+  .q-time { font-size:12px; color:var(--muted); font-family:'DM Mono',monospace; }
+  .badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:99px; font-size:11px; font-weight:500; }
+  .badge-next { background:var(--accent); color:#fff; }
+  .badge-you  { background:var(--warn-light); color:var(--warn); }
+  .status-bar {
+    display:flex; align-items:center; gap:8px; padding:10px 14px;
+    border-radius:var(--radius); font-size:13px; font-weight:500; margin-bottom:16px;
+  }
+  .s-waiting { background:var(--warn-light); color:var(--warn); border:0.5px solid rgba(184,92,0,0.2); }
+  .s-next    { background:var(--accent-light); color:var(--accent-text); border:0.5px solid rgba(45,91,227,0.2); }
+  .s-idle    { background:var(--bg); color:var(--muted); border:0.5px solid var(--border); }
+  .teacher-item {
+    display:flex; align-items:center; gap:10px; padding:12px 14px;
+    background:var(--bg); border-radius:var(--radius);
+    border:0.5px solid var(--border); margin-bottom:8px; animation:slideIn 0.2s ease;
+  }
+  .teacher-item.first { background:var(--success-light); border-color:rgba(26,122,74,0.2); }
+  .teacher-item .tname { flex:1; font-weight:500; }
+  .teacher-item.first .tname { color:var(--success); }
+  .done-btn {
+    font-size:12px; padding:5px 10px; background:var(--danger-light); color:var(--danger);
+    border-radius:6px; border:none; cursor:pointer; font-family:inherit; font-weight:500;
+  }
+  .done-btn:hover { opacity:0.8; }
+  .divider { border:none; border-top:0.5px solid var(--border); margin:16px 0; }
+  .meta-row { display:flex; align-items:center; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:12px; }
+  .pos-info { text-align:center; padding:12px; font-size:14px; color:var(--muted); margin-bottom:12px; }
+  .pos-info strong { color:var(--text); font-size:20px; display:block; margin-bottom:2px; }
+  .link-btn { background:none; border:none; color:var(--accent); font-family:inherit; font-size:12px; cursor:pointer; padding:0; text-decoration:underline; }
+  .code-box {
+    font-family:'DM Mono',monospace; font-size:22px; font-weight:500;
+    letter-spacing:0.15em; color:var(--accent); background:var(--accent-light);
+    border-radius:var(--radius); padding:10px 16px; text-align:center;
+    margin-bottom:12px; border:0.5px solid rgba(45,91,227,0.2);
+  }
+  .info-box {
+    background:var(--accent-light); border:0.5px solid rgba(45,91,227,0.2);
+    border-radius:var(--radius); padding:10px 14px; font-size:13px;
+    color:var(--accent-text); margin-bottom:12px;
+  }
+  .empty { text-align:center; padding:28px 0 12px; color:var(--muted); font-size:14px; }
+  .err { font-size:13px; color:var(--danger); margin-top:-6px; margin-bottom:10px; }
+  #app { width:100%; max-width:460px; }
+  .section { display:none; }
+  .section.active { display:block; }
+</style>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="en"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1">&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
-<p class="p1">&lt;title&gt;Class Help Queue&lt;/title&gt;</p>
-<p class="p1">&lt;link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet"&gt;</p>
-<p class="p1">&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>:root {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>--bg: #F7F5F0; --surface: #FFFFFF; --border: rgba(0,0,0,0.10);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>--border-strong: rgba(0,0,0,0.18); --text: #1A1917; --muted: #6B6860;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>--accent: #2D5BE3; --accent-light: #EEF2FD; --accent-text: #1A3BB0;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>--danger: #C0392B; --danger-light: #FEF0EE;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>--success: #1A7A4A; --success-light: #EDFAF3;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>--warn: #B85C00; --warn-light: #FEF7EE;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>--radius: 10px; --radius-lg: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>--shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>body {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>min-height: 100vh; display: flex; flex-direction: column;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>align-items: center; padding: 24px 16px 48px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.header { text-align: center; margin-bottom: 28px; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.header h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 4px; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.header p<span class="Apple-converted-space">  </span>{ font-size: 14px; color: var(--muted); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.card {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>background: var(--surface); border-radius: var(--radius-lg);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border: 0.5px solid var(--border-strong); padding: 24px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>box-shadow: var(--shadow); width: 100%; max-width: 460px; margin-bottom: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.card-label {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>font-size: 11px; font-weight: 600; color: var(--muted);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>input[type="text"], input[type="password"] {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>width: 100%; padding: 10px 14px; border: 0.5px solid var(--border-strong);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border-radius: var(--radius); font-family: inherit; font-size: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>color: var(--text); background: var(--bg); outline: none;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>transition: border-color 0.15s; margin-bottom: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>input:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px rgba(45,91,227,0.12); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>button {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>font-family: inherit; font-size: 14px; font-weight: 500;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>cursor: pointer; border-radius: var(--radius); padding: 10px 18px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border: none; transition: opacity 0.15s, transform 0.1s;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>button:active { transform: scale(0.97); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>button:disabled { opacity: 0.45; cursor: not-allowed; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.btn-primary { background: var(--accent); color: #fff; width: 100%; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.btn-primary:hover:not(:disabled) { opacity: 0.88; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.btn-danger { background: var(--danger-light); color: var(--danger); width: 100%; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.btn-ghost { background: transparent; color: var(--muted); border: 0.5px solid var(--border-strong); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.btn-ghost:hover { background: var(--bg); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.queue-item {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>display: flex; align-items: center; gap: 12px; padding: 12px 14px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>background: var(--bg); border-radius: var(--radius);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border: 0.5px solid var(--border); animation: slideIn 0.2s ease; margin-bottom: 8px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>@keyframes slideIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.queue-item.first { background: var(--accent-light); border-color: rgba(45,91,227,0.25); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.q-num<span class="Apple-converted-space">  </span>{ font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); min-width:22px; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.q-name { flex:1; font-weight:500; font-size:15px; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.queue-item.first .q-name { color: var(--accent-text); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.q-time { font-size:12px; color:var(--muted); font-family:'DM Mono',monospace; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:99px; font-size:11px; font-weight:500; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.badge-next { background:var(--accent); color:#fff; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.badge-you<span class="Apple-converted-space">  </span>{ background:var(--warn-light); color:var(--warn); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.status-bar {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>display:flex; align-items:center; gap:8px; padding:10px 14px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border-radius:var(--radius); font-size:13px; font-weight:500; margin-bottom:16px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.s-waiting { background:var(--warn-light); color:var(--warn); border:0.5px solid rgba(184,92,0,0.2); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.s-next<span class="Apple-converted-space">    </span>{ background:var(--accent-light); color:var(--accent-text); border:0.5px solid rgba(45,91,227,0.2); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.s-idle<span class="Apple-converted-space">    </span>{ background:var(--bg); color:var(--muted); border:0.5px solid var(--border); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.teacher-item {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>display:flex; align-items:center; gap:10px; padding:12px 14px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>background:var(--bg); border-radius:var(--radius);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border:0.5px solid var(--border); margin-bottom:8px; animation:slideIn 0.2s ease;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.teacher-item.first { background:var(--success-light); border-color:rgba(26,122,74,0.2); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.teacher-item .tname { flex:1; font-weight:500; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.teacher-item.first .tname { color:var(--success); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.done-btn {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>font-size:12px; padding:5px 10px; background:var(--danger-light); color:var(--danger);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border-radius:6px; border:none; cursor:pointer; font-family:inherit; font-weight:500;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.done-btn:hover { opacity:0.8; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.divider { border:none; border-top:0.5px solid var(--border); margin:16px 0; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.meta-row { display:flex; align-items:center; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:12px; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.pos-info { text-align:center; padding:12px; font-size:14px; color:var(--muted); margin-bottom:12px; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.pos-info strong { color:var(--text); font-size:20px; display:block; margin-bottom:2px; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.link-btn { background:none; border:none; color:var(--accent); font-family:inherit; font-size:12px; cursor:pointer; padding:0; text-decoration:underline; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.code-box {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>font-family:'DM Mono',monospace; font-size:22px; font-weight:500;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>letter-spacing:0.15em; color:var(--accent); background:var(--accent-light);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border-radius:var(--radius); padding:10px 16px; text-align:center;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>margin-bottom:12px; border:0.5px solid rgba(45,91,227,0.2);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.info-box {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>background:var(--accent-light); border:0.5px solid rgba(45,91,227,0.2);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border-radius:var(--radius); padding:10px 14px; font-size:13px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>color:var(--accent-text); margin-bottom:12px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.empty { text-align:center; padding:28px 0 12px; color:var(--muted); font-size:14px; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.err { font-size:13px; color:var(--danger); margin-top:-6px; margin-bottom:10px; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>#app { width:100%; max-width:460px; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.section { display:none; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.section.active { display:block; }</p>
-<p class="p1">&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;div class="header"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;h1&gt;📋 Class Help Queue&lt;/h1&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;p&gt;Raise your hand — digitally.&lt;/p&gt;</p>
-<p class="p1">&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;div id="app"&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- LANDING --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="s-land" class="section active"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card-label"&gt;I am a…&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn-primary" style="margin-bottom:10px;" onclick="go('s-scode')"&gt;Student — Join the Queue&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn-ghost" style="width:100%;" onclick="go('s-tlogin')"&gt;Teacher — Manage Queue&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- STUDENT step 1: class code --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="s-scode" class="section"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card-label"&gt;Student — Step 1 of 2&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;p style="font-size:14px;color:var(--muted);margin-bottom:14px;"&gt;Enter the class code your teacher gave you.&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;input type="text" id="i-scode" placeholder="Class code (e.g. MATH3)" maxlength="20"</p>
-<p class="p1"><span class="Apple-converted-space">        </span>style="text-transform:uppercase" onkeydown="if(event.key==='Enter')sCheckCode()" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="err" id="e-scode"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn-primary" onclick="sCheckCode()"&gt;Next →&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;hr class="divider"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn-ghost" style="width:100%;font-size:13px;" onclick="go('s-land')"&gt;← Back&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- STUDENT step 2: name --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="s-sname" class="section"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card-label"&gt;Student — Step 2 of 2&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="info-box" id="sname-class-label"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;input type="text" id="i-sname" placeholder="Your first name" maxlength="32"</p>
-<p class="p1"><span class="Apple-converted-space">        </span>onkeydown="if(event.key==='Enter')sEnter()" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="err" id="e-sname"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn-primary" onclick="sEnter()"&gt;Enter Queue →&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;hr class="divider"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn-ghost" style="width:100%;font-size:13px;" onclick="go('s-scode')"&gt;← Back&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- STUDENT main --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="s-smain" class="section"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="card-label" style="margin-bottom:0" id="smain-class"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;span style="font-size:13px;font-weight:500;color:var(--muted)" id="smain-name"&gt;&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="s-status" class="status-bar s-idle"&gt;Not in queue&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="s-pos" style="display:none" class="pos-info"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;strong id="s-pos-n"&gt;&lt;/strong&gt;&lt;span id="s-pos-t"&gt;&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div style="display:flex;gap:8px;margin-bottom:16px;"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="btn-primary" id="s-join" onclick="sJoin()" style="flex:1"&gt;✋ Join Queue&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="btn-danger" id="s-leave" onclick="sLeave()" style="flex:1;display:none"&gt;✓ Leave Queue&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;hr class="divider"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="meta-row"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;span&gt;&lt;strong id="s-count"&gt;0&lt;/strong&gt; waiting&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="link-btn" onclick="sLogout()"&gt;Change name / class&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="s-list"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- TEACHER login --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="s-tlogin" class="section"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card-label"&gt;Teacher Access&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;input type="text" id="i-tcode" placeholder="Class code" maxlength="20" style="text-transform:uppercase" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;input type="password" id="i-tpass" placeholder="Passcode" maxlength="32"</p>
-<p class="p1"><span class="Apple-converted-space">        </span>onkeydown="if(event.key==='Enter')tLogin()" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="err" id="e-tlogin"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn-primary" onclick="tLogin()"&gt;Enter Dashboard&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;hr class="divider"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;p style="font-size:12px;color:var(--muted);margin-bottom:10px;"&gt;First time? Create your class below.&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn-ghost" style="width:100%;font-size:13px;" onclick="go('s-tsetup')"&gt;Set Up New Class&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;hr class="divider"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn-ghost" style="width:100%;font-size:13px;" onclick="go('s-land')"&gt;← Back&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- TEACHER setup --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="s-tsetup" class="section"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card-label"&gt;Create a Class&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;p style="font-size:13px;color:var(--muted);margin-bottom:14px;"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>Students type the class code to join. The passcode is only for teacher access.</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;input type="text" id="i-tclassname" placeholder="Class name (e.g. Period 3 Math)" maxlength="48" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;input type="text" id="i-tclasscode" placeholder="Class code students will type (e.g. MATH3)" maxlength="10"</p>
-<p class="p1"><span class="Apple-converted-space">        </span>style="text-transform:uppercase" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;input type="password" id="i-tpass1" placeholder="Your teacher passcode" maxlength="32" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;input type="password" id="i-tpass2" placeholder="Confirm passcode" maxlength="32" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="err" id="e-tsetup"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn-primary" onclick="tSetup()"&gt;Create Class →&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;hr class="divider"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn-ghost" style="width:100%;font-size:13px;" onclick="go('s-tlogin')"&gt;← Back&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- TEACHER dashboard --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="s-tdash" class="section"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="card-label" style="margin-bottom:0" id="t-classname"&gt;Queue&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style="display:flex;gap:8px;align-items:center;"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;span style="font-size:11px;color:var(--muted);"&gt;● live&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;button class="btn-ghost" style="font-size:12px;padding:5px 10px" onclick="tLogout()"&gt;Sign out&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;p style="font-size:12px;color:var(--muted);margin-bottom:8px;"&gt;Share this code with students:&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="code-box" id="t-codebox"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="t-banner" style="display:none" class="status-bar s-next"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>🎉 Next up: &lt;strong id="t-next" style="margin-left:4px"&gt;&lt;/strong&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="meta-row" style="margin-bottom:0"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;span&gt;&lt;strong id="t-count"&gt;0&lt;/strong&gt; waiting&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="link-btn" onclick="tClearAll()"&gt;Clear all&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;hr class="divider"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="t-list"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;script&gt;</p>
-<p class="p1">/* ── App state ── */</p>
-<p class="p1">let A = { code: null, className: null, name: null, teacher: false, iv: null };</p>
-<p class="p2"><br></p>
-<p class="p1">/* ── Navigation ── */</p>
-<p class="p1">function go(id) {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.querySelectorAll('.section').forEach(s =&gt; s.classList.remove('active'));</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById(id).classList.add('active');</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">/* ── Utilities ── */</p>
-<p class="p1">function esc(s) {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>return String(s).replace(/&amp;/g,'&amp;amp;').replace(/&lt;/g,'&amp;lt;').replace(/&gt;/g,'&amp;gt;').replace(/"/g,'&amp;quot;');</p>
-<p class="p1">}</p>
-<p class="p1">function timeAgo(ts) {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const s = Math.floor((Date.now()-ts)/1000);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (s &lt; 60) return s+'s ago';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const m = Math.floor(s/60);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (m &lt; 60) return m+'m ago';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>return Math.floor(m/60)+'h ago';</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">/* ── Storage ── */</p>
-<p class="p1">function qKey(c) <span class="Apple-converted-space">  </span>{ return 'chq_q_'+(c||'').toUpperCase(); }</p>
-<p class="p1">function cfgKey(c) { return 'chq_c_'+(c||'').toUpperCase(); }</p>
-<p class="p1">function getQ(c) <span class="Apple-converted-space">  </span>{ try { return JSON.parse(localStorage.getItem(qKey(c))||'[]'); } catch { return []; } }</p>
-<p class="p1">function setQ(c,q) { localStorage.setItem(qKey(c), JSON.stringify(q)); }</p>
-<p class="p1">function getCfg(c) { try { return JSON.parse(localStorage.getItem(cfgKey(c))); } catch { return null; } }</p>
-<p class="p1">function setCfg(c,v){ localStorage.setItem(cfgKey(c.toUpperCase()), JSON.stringify(v)); }</p>
-<p class="p2"><br></p>
-<p class="p1">/* ── Student: check class code ── */</p>
-<p class="p1">function sCheckCode() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const raw = document.getElementById('i-scode').value.trim().toUpperCase();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const err = document.getElementById('e-scode');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!raw) { err.textContent = 'Enter your class code.'; return; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const cfg = getCfg(raw);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!cfg) { err.textContent = `No class found for "${raw}". Double-check with your teacher.`; return; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>A.code = raw; A.className = cfg.className;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>err.textContent = '';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('sname-class-label').textContent = 'Class: ' + cfg.className;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>go('s-sname');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>setTimeout(() =&gt; document.getElementById('i-sname').focus(), 80);</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">/* ── Student: submit name ── */</p>
-<p class="p1">function sEnter() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const n = document.getElementById('i-sname').value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const err = document.getElementById('e-sname');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!n) { err.textContent = 'Enter your first name.'; return; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>A.name = n;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>err.textContent = '';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('smain-class').textContent = A.className;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('smain-name').textContent = n;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>go('s-smain');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>poll(renderStudent);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>renderStudent();</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function sLogout() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>Object.assign(A, { code:null, className:null, name:null });</p>
-<p class="p1"><span class="Apple-converted-space">  </span>stopPoll();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('i-sname').value = '';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('i-scode').value = '';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>go('s-land');</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">/* ── Student: join / leave ── */</p>
-<p class="p1">function sJoin() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const q = getQ(A.code);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!q.find(x =&gt; x.name.toLowerCase()===A.name.toLowerCase())) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>q.push({ name: A.name, ts: Date.now() });</p>
-<p class="p1"><span class="Apple-converted-space">    </span>setQ(A.code, q);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>renderStudent();</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function sLeave() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>setQ(A.code, getQ(A.code).filter(x =&gt; x.name.toLowerCase()!==A.name.toLowerCase()));</p>
-<p class="p1"><span class="Apple-converted-space">  </span>renderStudent();</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">/* ── Student: render ── */</p>
-<p class="p1">function renderStudent() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const q = getQ(A.code);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const idx = q.findIndex(x =&gt; x.name.toLowerCase()===A.name.toLowerCase());</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const inQ = idx !== -1;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const sb = document.getElementById('s-status');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const pi = document.getElementById('s-pos');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const jb = document.getElementById('s-join');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const lb = document.getElementById('s-leave');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (inQ) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>sb.className = idx===0 ? 'status-bar s-next' : 'status-bar s-waiting';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>sb.textContent = idx===0 ? "🎉 You're next! Get ready." : "⏳ You're in the queue";</p>
-<p class="p1"><span class="Apple-converted-space">    </span>pi.style.display = 'block';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('s-pos-n').textContent = idx===0 ? '🎉' : '#'+(idx+1);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('s-pos-t').textContent = idx===0 ? "You're next!" : ' of '+q.length+' in line';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>jb.style.display = 'none'; lb.style.display = 'block';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>sb.className = 'status-bar s-idle';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>sb.textContent = 'Not in queue — click to join when you need help';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>pi.style.display = 'none';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>jb.style.display = 'block'; lb.style.display = 'none';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('s-count').textContent = q.length;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const el = document.getElementById('s-list');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!q.length) { el.innerHTML='&lt;div class="empty"&gt;✅ Queue is empty — no wait!&lt;/div&gt;'; return; }</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>el.innerHTML = q.map((item,i) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const isYou = item.name.toLowerCase()===A.name.toLowerCase();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>return `&lt;div class="queue-item ${i===0?'first':''}"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;span class="q-num"&gt;${i+1}&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;span class="q-name"&gt;${esc(item.name)}&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>${i===0 ? '&lt;span class="badge badge-next"&gt;Next&lt;/span&gt;' : ''}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>${isYou&amp;&amp;i&gt;0 ? '&lt;span class="badge badge-you"&gt;You&lt;/span&gt;' : ''}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;span class="q-time"&gt;${timeAgo(item.ts)}&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;`;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}).join('');</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">/* ── Teacher: login ── */</p>
-<p class="p1">function tLogin() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const code = document.getElementById('i-tcode').value.trim().toUpperCase();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const pass = document.getElementById('i-tpass').value;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const err<span class="Apple-converted-space">  </span>= document.getElementById('e-tlogin');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!code) { err.textContent = 'Enter your class code.'; return; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!pass) { err.textContent = 'Enter your passcode.'; return; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const cfg = getCfg(code);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!cfg)<span class="Apple-converted-space">            </span>{ err.textContent = `No class found for "${code}". Set up your class first.`; return; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (cfg.passcode !== pass) { err.textContent = 'Wrong passcode.'; return; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>err.textContent = '';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>A.code = code; A.className = cfg.className; A.teacher = true;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('t-classname').textContent = cfg.className;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('t-codebox').textContent = code;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>go('s-tdash');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>poll(renderTeacher);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>renderTeacher();</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">/* ── Teacher: setup ── */</p>
-<p class="p1">function tSetup() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const cn <span class="Apple-converted-space">  </span>= document.getElementById('i-tclassname').value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const code = document.getElementById('i-tclasscode').value.trim().toUpperCase();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const p1 <span class="Apple-converted-space">  </span>= document.getElementById('i-tpass1').value;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const p2 <span class="Apple-converted-space">  </span>= document.getElementById('i-tpass2').value;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const err<span class="Apple-converted-space">  </span>= document.getElementById('e-tsetup');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!cn) <span class="Apple-converted-space">  </span>{ err.textContent = 'Enter a class name.'; return; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!code) { err.textContent = 'Enter a class code.'; return; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!/^[A-Z0-9]{2,10}$/.test(code)) { err.textContent = 'Code must be 2–10 letters/numbers, no spaces.'; return; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!p1) <span class="Apple-converted-space">  </span>{ err.textContent = 'Choose a passcode.'; return; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (p1!==p2){ err.textContent = "Passcodes don't match."; return; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>setCfg(code, { className: cn, passcode: p1 });</p>
-<p class="p1"><span class="Apple-converted-space">  </span>err.textContent = '';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('i-tcode').value = code;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('i-tpass').value = p1;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>go('s-tlogin');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>setTimeout(() =&gt; alert(`✅ Class "${cn}" created!\n\nStudent class code: ${code}\n\nYou're ready to log in.`), 80);</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">/* ── Teacher: actions ── */</p>
-<p class="p1">function tRemove(name) {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>setQ(A.code, getQ(A.code).filter(x =&gt; x.name !== name));</p>
-<p class="p1"><span class="Apple-converted-space">  </span>renderTeacher();</p>
-<p class="p1">}</p>
-<p class="p1">function tClearAll() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!confirm('Clear the entire queue?')) return;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>setQ(A.code, []); renderTeacher();</p>
-<p class="p1">}</p>
-<p class="p1">function tLogout() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>A.teacher = false; A.code = null; stopPoll();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('i-tpass').value = '';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('i-tcode').value = '';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>go('s-land');</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">/* ── Teacher: render ── */</p>
-<p class="p1">function renderTeacher() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const q = getQ(A.code);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('t-count').textContent = q.length;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const banner = document.getElementById('t-banner');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (q.length) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>banner.style.display = 'flex';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('t-next').textContent = q[0].name;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>banner.style.display = 'none';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const el = document.getElementById('t-list');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!q.length) { el.innerHTML='&lt;div class="empty"&gt;✅ Queue is empty. All students are set!&lt;/div&gt;'; return; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>el.innerHTML = q.map((item,i) =&gt; `</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="teacher-item ${i===0?'first':''}"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);min-width:20px"&gt;${i+1}&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;span class="tname"&gt;${esc(item.name)}&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace"&gt;${timeAgo(item.ts)}&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="done-btn" onclick="tRemove(${JSON.stringify(item.name)})"&gt;Done ✓&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;`).join('');</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">/* ── Polling ── */</p>
-<p class="p1">function poll(fn) { stopPoll(); A.iv = setInterval(fn, 2500); }</p>
-<p class="p1">function stopPoll() { if (A.iv) { clearInterval(A.iv); A.iv = null; } }</p>
-<p class="p2"><br></p>
-<p class="p1">/* Cross-tab sync via storage event */</p>
-<p class="p1">window.addEventListener('storage', () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (A.teacher) renderTeacher();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>else if (A.name) renderStudent();</p>
-<p class="p1">});</p>
-<p class="p1">&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+
+<div class="header">
+  <h1>📋 Class Help Queue</h1>
+  <p>Raise your hand — digitally.</p>
+</div>
+
+<div id="app">
+
+  <!-- LANDING -->
+  <div id="s-land" class="section active">
+    <div class="card">
+      <div class="card-label">I am a…</div>
+      <button class="btn-primary" style="margin-bottom:10px;" onclick="go('s-scode')">Student — Join the Queue</button>
+      <button class="btn-ghost" style="width:100%;" onclick="go('s-tlogin')">Teacher — Manage Queue</button>
+    </div>
+  </div>
+
+  <!-- STUDENT step 1: class code -->
+  <div id="s-scode" class="section">
+    <div class="card">
+      <div class="card-label">Student — Step 1 of 2</div>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:14px;">Enter the class code your teacher gave you.</p>
+      <input type="text" id="i-scode" placeholder="Class code (e.g. MATH3)" maxlength="20"
+        style="text-transform:uppercase" onkeydown="if(event.key==='Enter')sCheckCode()" />
+      <div class="err" id="e-scode"></div>
+      <button class="btn-primary" onclick="sCheckCode()">Next →</button>
+      <hr class="divider">
+      <button class="btn-ghost" style="width:100%;font-size:13px;" onclick="go('s-land')">← Back</button>
+    </div>
+  </div>
+
+  <!-- STUDENT step 2: name -->
+  <div id="s-sname" class="section">
+    <div class="card">
+      <div class="card-label">Student — Step 2 of 2</div>
+      <div class="info-box" id="sname-class-label"></div>
+      <input type="text" id="i-sname" placeholder="Your first name" maxlength="32"
+        onkeydown="if(event.key==='Enter')sEnter()" />
+      <div class="err" id="e-sname"></div>
+      <button class="btn-primary" onclick="sEnter()">Enter Queue →</button>
+      <hr class="divider">
+      <button class="btn-ghost" style="width:100%;font-size:13px;" onclick="go('s-scode')">← Back</button>
+    </div>
+  </div>
+
+  <!-- STUDENT main -->
+  <div id="s-smain" class="section">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="card-label" style="margin-bottom:0" id="smain-class"></div>
+        <span style="font-size:13px;font-weight:500;color:var(--muted)" id="smain-name"></span>
+      </div>
+      <div id="s-status" class="status-bar s-idle">Not in queue</div>
+      <div id="s-pos" style="display:none" class="pos-info">
+        <strong id="s-pos-n"></strong><span id="s-pos-t"></span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button class="btn-primary" id="s-join" onclick="sJoin()" style="flex:1">✋ Join Queue</button>
+        <button class="btn-danger" id="s-leave" onclick="sLeave()" style="flex:1;display:none">✓ Leave Queue</button>
+      </div>
+      <hr class="divider">
+      <div class="meta-row">
+        <span><strong id="s-count">0</strong> waiting</span>
+        <button class="link-btn" onclick="sLogout()">Change name / class</button>
+      </div>
+      <div id="s-list"></div>
+    </div>
+  </div>
+
+  <!-- TEACHER login -->
+  <div id="s-tlogin" class="section">
+    <div class="card">
+      <div class="card-label">Teacher Access</div>
+      <input type="text" id="i-tcode" placeholder="Class code" maxlength="20" style="text-transform:uppercase" />
+      <input type="password" id="i-tpass" placeholder="Passcode" maxlength="32"
+        onkeydown="if(event.key==='Enter')tLogin()" />
+      <div class="err" id="e-tlogin"></div>
+      <button class="btn-primary" onclick="tLogin()">Enter Dashboard</button>
+      <hr class="divider">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">First time? Create your class below.</p>
+      <button class="btn-ghost" style="width:100%;font-size:13px;" onclick="go('s-tsetup')">Set Up New Class</button>
+      <hr class="divider">
+      <button class="btn-ghost" style="width:100%;font-size:13px;" onclick="go('s-land')">← Back</button>
+    </div>
+  </div>
+
+  <!-- TEACHER setup -->
+  <div id="s-tsetup" class="section">
+    <div class="card">
+      <div class="card-label">Create a Class</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">
+        Students type the class code to join. The passcode is only for teacher access.
+      </p>
+      <input type="text" id="i-tclassname" placeholder="Class name (e.g. Period 3 Math)" maxlength="48" />
+      <input type="text" id="i-tclasscode" placeholder="Class code students will type (e.g. MATH3)" maxlength="10"
+        style="text-transform:uppercase" />
+      <input type="password" id="i-tpass1" placeholder="Your teacher passcode" maxlength="32" />
+      <input type="password" id="i-tpass2" placeholder="Confirm passcode" maxlength="32" />
+      <div class="err" id="e-tsetup"></div>
+      <button class="btn-primary" onclick="tSetup()">Create Class →</button>
+      <hr class="divider">
+      <button class="btn-ghost" style="width:100%;font-size:13px;" onclick="go('s-tlogin')">← Back</button>
+    </div>
+  </div>
+
+  <!-- TEACHER dashboard -->
+  <div id="s-tdash" class="section">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div class="card-label" style="margin-bottom:0" id="t-classname">Queue</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-size:11px;color:var(--muted);">● live</span>
+          <button class="btn-ghost" style="font-size:12px;padding:5px 10px" onclick="tLogout()">Sign out</button>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">Share this code with students:</p>
+      <div class="code-box" id="t-codebox"></div>
+      <div id="t-banner" style="display:none" class="status-bar s-next">
+        🎉 Next up: <strong id="t-next" style="margin-left:4px"></strong>
+      </div>
+      <div class="meta-row" style="margin-bottom:0">
+        <span><strong id="t-count">0</strong> waiting</span>
+        <button class="link-btn" onclick="tClearAll()">Clear all</button>
+      </div>
+      <hr class="divider">
+      <div id="t-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ── App state ── */
+let A = { code: null, className: null, name: null, teacher: false, iv: null };
+
+/* ── Navigation ── */
+function go(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ── Utilities ── */
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function timeAgo(ts) {
+  const s = Math.floor((Date.now()-ts)/1000);
+  if (s < 60) return s+'s ago';
+  const m = Math.floor(s/60);
+  if (m < 60) return m+'m ago';
+  return Math.floor(m/60)+'h ago';
+}
+
+/* ── Storage ── */
+function qKey(c)   { return 'chq_q_'+(c||'').toUpperCase(); }
+function cfgKey(c) { return 'chq_c_'+(c||'').toUpperCase(); }
+function getQ(c)   { try { return JSON.parse(localStorage.getItem(qKey(c))||'[]'); } catch { return []; } }
+function setQ(c,q) { localStorage.setItem(qKey(c), JSON.stringify(q)); }
+function getCfg(c) { try { return JSON.parse(localStorage.getItem(cfgKey(c))); } catch { return null; } }
+function setCfg(c,v){ localStorage.setItem(cfgKey(c.toUpperCase()), JSON.stringify(v)); }
+
+/* ── Student: check class code ── */
+function sCheckCode() {
+  const raw = document.getElementById('i-scode').value.trim().toUpperCase();
+  const err = document.getElementById('e-scode');
+  if (!raw) { err.textContent = 'Enter your class code.'; return; }
+  const cfg = getCfg(raw);
+  if (!cfg) { err.textContent = `No class found for "${raw}". Double-check with your teacher.`; return; }
+  A.code = raw; A.className = cfg.className;
+  err.textContent = '';
+  document.getElementById('sname-class-label').textContent = 'Class: ' + cfg.className;
+  go('s-sname');
+  setTimeout(() => document.getElementById('i-sname').focus(), 80);
+}
+
+/* ── Student: submit name ── */
+function sEnter() {
+  const n = document.getElementById('i-sname').value.trim();
+  const err = document.getElementById('e-sname');
+  if (!n) { err.textContent = 'Enter your first name.'; return; }
+  A.name = n;
+  err.textContent = '';
+  document.getElementById('smain-class').textContent = A.className;
+  document.getElementById('smain-name').textContent = n;
+  go('s-smain');
+  poll(renderStudent);
+  renderStudent();
+}
+
+function sLogout() {
+  Object.assign(A, { code:null, className:null, name:null });
+  stopPoll();
+  document.getElementById('i-sname').value = '';
+  document.getElementById('i-scode').value = '';
+  go('s-land');
+}
+
+/* ── Student: join / leave ── */
+function sJoin() {
+  const q = getQ(A.code);
+  if (!q.find(x => x.name.toLowerCase()===A.name.toLowerCase())) {
+    q.push({ name: A.name, ts: Date.now() });
+    setQ(A.code, q);
+  }
+  renderStudent();
+}
+
+function sLeave() {
+  setQ(A.code, getQ(A.code).filter(x => x.name.toLowerCase()!==A.name.toLowerCase()));
+  renderStudent();
+}
+
+/* ── Student: render ── */
+function renderStudent() {
+  const q = getQ(A.code);
+  const idx = q.findIndex(x => x.name.toLowerCase()===A.name.toLowerCase());
+  const inQ = idx !== -1;
+  const sb = document.getElementById('s-status');
+  const pi = document.getElementById('s-pos');
+  const jb = document.getElementById('s-join');
+  const lb = document.getElementById('s-leave');
+
+  if (inQ) {
+    sb.className = idx===0 ? 'status-bar s-next' : 'status-bar s-waiting';
+    sb.textContent = idx===0 ? "🎉 You're next! Get ready." : "⏳ You're in the queue";
+    pi.style.display = 'block';
+    document.getElementById('s-pos-n').textContent = idx===0 ? '🎉' : '#'+(idx+1);
+    document.getElementById('s-pos-t').textContent = idx===0 ? "You're next!" : ' of '+q.length+' in line';
+    jb.style.display = 'none'; lb.style.display = 'block';
+  } else {
+    sb.className = 'status-bar s-idle';
+    sb.textContent = 'Not in queue — click to join when you need help';
+    pi.style.display = 'none';
+    jb.style.display = 'block'; lb.style.display = 'none';
+  }
+
+  document.getElementById('s-count').textContent = q.length;
+  const el = document.getElementById('s-list');
+
+  if (!q.length) { el.innerHTML='<div class="empty">✅ Queue is empty — no wait!</div>'; return; }
+
+  el.innerHTML = q.map((item,i) => {
+    const isYou = item.name.toLowerCase()===A.name.toLowerCase();
+    return `<div class="queue-item ${i===0?'first':''}">
+      <span class="q-num">${i+1}</span>
+      <span class="q-name">${esc(item.name)}</span>
+      ${i===0 ? '<span class="badge badge-next">Next</span>' : ''}
+      ${isYou&&i>0 ? '<span class="badge badge-you">You</span>' : ''}
+      <span class="q-time">${timeAgo(item.ts)}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ── Teacher: login ── */
+function tLogin() {
+  const code = document.getElementById('i-tcode').value.trim().toUpperCase();
+  const pass = document.getElementById('i-tpass').value;
+  const err  = document.getElementById('e-tlogin');
+  if (!code) { err.textContent = 'Enter your class code.'; return; }
+  if (!pass) { err.textContent = 'Enter your passcode.'; return; }
+  const cfg = getCfg(code);
+  if (!cfg)            { err.textContent = `No class found for "${code}". Set up your class first.`; return; }
+  if (cfg.passcode !== pass) { err.textContent = 'Wrong passcode.'; return; }
+  err.textContent = '';
+  A.code = code; A.className = cfg.className; A.teacher = true;
+  document.getElementById('t-classname').textContent = cfg.className;
+  document.getElementById('t-codebox').textContent = code;
+  go('s-tdash');
+  poll(renderTeacher);
+  renderTeacher();
+}
+
+/* ── Teacher: setup ── */
+function tSetup() {
+  const cn   = document.getElementById('i-tclassname').value.trim();
+  const code = document.getElementById('i-tclasscode').value.trim().toUpperCase();
+  const p1   = document.getElementById('i-tpass1').value;
+  const p2   = document.getElementById('i-tpass2').value;
+  const err  = document.getElementById('e-tsetup');
+  if (!cn)   { err.textContent = 'Enter a class name.'; return; }
+  if (!code) { err.textContent = 'Enter a class code.'; return; }
+  if (!/^[A-Z0-9]{2,10}$/.test(code)) { err.textContent = 'Code must be 2–10 letters/numbers, no spaces.'; return; }
+  if (!p1)   { err.textContent = 'Choose a passcode.'; return; }
+  if (p1!==p2){ err.textContent = "Passcodes don't match."; return; }
+  setCfg(code, { className: cn, passcode: p1 });
+  err.textContent = '';
+  document.getElementById('i-tcode').value = code;
+  document.getElementById('i-tpass').value = p1;
+  go('s-tlogin');
+  setTimeout(() => alert(`✅ Class "${cn}" created!\n\nStudent class code: ${code}\n\nYou're ready to log in.`), 80);
+}
+
+/* ── Teacher: actions ── */
+function tRemove(name) {
+  setQ(A.code, getQ(A.code).filter(x => x.name !== name));
+  renderTeacher();
+}
+function tClearAll() {
+  if (!confirm('Clear the entire queue?')) return;
+  setQ(A.code, []); renderTeacher();
+}
+function tLogout() {
+  A.teacher = false; A.code = null; stopPoll();
+  document.getElementById('i-tpass').value = '';
+  document.getElementById('i-tcode').value = '';
+  go('s-land');
+}
+
+/* ── Teacher: render ── */
+function renderTeacher() {
+  const q = getQ(A.code);
+  document.getElementById('t-count').textContent = q.length;
+  const banner = document.getElementById('t-banner');
+  if (q.length) {
+    banner.style.display = 'flex';
+    document.getElementById('t-next').textContent = q[0].name;
+  } else {
+    banner.style.display = 'none';
+  }
+  const el = document.getElementById('t-list');
+  if (!q.length) { el.innerHTML='<div class="empty">✅ Queue is empty. All students are set!</div>'; return; }
+  el.innerHTML = q.map((item,i) => `
+    <div class="teacher-item ${i===0?'first':''}">
+      <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);min-width:20px">${i+1}</span>
+      <span class="tname">${esc(item.name)}</span>
+      <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">${timeAgo(item.ts)}</span>
+      <button class="done-btn" onclick="tRemove(${JSON.stringify(item.name)})">Done ✓</button>
+    </div>`).join('');
+}
+
+/* ── Polling ── */
+function poll(fn) { stopPoll(); A.iv = setInterval(fn, 2500); }
+function stopPoll() { if (A.iv) { clearInterval(A.iv); A.iv = null; } }
+
+/* Cross-tab sync via storage event */
+window.addEventListener('storage', () => {
+  if (A.teacher) renderTeacher();
+  else if (A.name) renderStudent();
+});
+</script>
 </body>
 </html>
