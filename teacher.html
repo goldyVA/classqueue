@@ -38,6 +38,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .btn-del{font-size:12px;padding:5px 10px;background:var(--danger-light);color:var(--danger);border-radius:6px;border:.5px solid rgba(192,57,43,.2);cursor:pointer;font-family:inherit;font-weight:500;flex-shrink:0}
 .btn-open{font-size:12px;padding:5px 12px;background:var(--accent-light);color:var(--accent-text);border-radius:6px;border:.5px solid rgba(45,91,227,.2);cursor:pointer;font-family:inherit;font-weight:500;flex-shrink:0}
 .btn-open:hover{opacity:.8}
+.btn-change{font-size:12px;padding:5px 10px;background:var(--warn-light);color:var(--warn);border-radius:6px;border:.5px solid rgba(184,92,0,.2);cursor:pointer;font-family:inherit;font-weight:500;flex-shrink:0}
+.btn-change:hover{opacity:.8}
 .divider{border:none;border-top:.5px solid var(--border);margin:16px 0}
 .err{font-size:13px;color:var(--danger);margin-top:8px}
 .empty{text-align:center;padding:24px 0 8px;color:var(--muted);font-size:14px}
@@ -316,6 +318,7 @@ function addCard(cls) {
       '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
         '<button class="btn-open" onclick="openProjected(\''+cls.code+'\',\''+esc(cls.className)+'\')">&#9654; Open Display</button>' +
         '<button class="btn-primary" style="font-size:13px;padding:7px 14px" onclick="clearQ(\''+cls.code+'\')">Clear Queue</button>' +
+        '<button class="btn-change" onclick="changeCode(\''+cls.code+'\',\''+esc(cls.className)+'\')">Change Code</button>' +
         '<button class="btn-del" onclick="delClass(\''+cls.code+'\',\''+esc(cls.className)+'\')">Delete Class</button>' +
       '</div>' +
     '</div>';
@@ -440,6 +443,50 @@ window.createClass=function(){
       });
     });
   }).catch(function(e){ err.textContent="Error: "+e.message; });
+};
+
+window.changeCode=function(oldCode,className){
+  var newCode=prompt('Enter a new class code for "'+className+'":\n(2-10 letters/numbers, no spaces)','');
+  if (!newCode) return;
+  newCode=newCode.trim().toUpperCase();
+  if (!/^[A-Z0-9]{2,10}$/.test(newCode)) { alert("Code must be 2-10 letters/numbers, no spaces."); return; }
+  if (newCode===oldCode) { alert("That is already the current code."); return; }
+  get(ref(db,"classes/"+newCode+"/config")).then(function(snap){
+    if (snap.exists()) { alert('Code "'+newCode+'" is already in use. Choose another.'); return; }
+    // Read existing config and queue
+    get(ref(db,"classes/"+oldCode)).then(function(clsSnap){
+      var clsData=clsSnap.exists()?clsSnap.val():{};
+      // Update code field in config
+      if (clsData.config) clsData.config.code=newCode;
+      // Write to new path
+      set(ref(db,"classes/"+newCode),clsData).then(function(){
+        // Remove old path
+        remove(ref(db,"classes/"+oldCode));
+        // Update teacherClasses entry
+        get(ref(db,"teacherClasses/"+me.uid)).then(function(tcSnap){
+          if (tcSnap.exists()) {
+            var entries=Object.entries(tcSnap.val());
+            for (var i=0;i<entries.length;i++) {
+              if (entries[i][1].code===oldCode) {
+                var updated=Object.assign({},entries[i][1],{code:newCode});
+                set(ref(db,"teacherClasses/"+me.uid+"/"+entries[i][0]),updated);
+                break;
+              }
+            }
+          }
+        });
+        // Stop old listener, update card UI
+        if (unsubs[oldCode]) { unsubs[oldCode](); delete unsubs[oldCode]; }
+        if (pvCode===oldCode) closeProjected();
+        var card=document.getElementById("cls-"+oldCode);
+        if (card) card.remove();
+        var el=document.getElementById("classes-list");
+        if (el.querySelector("[style*='padding:32px']")) el.innerHTML="";
+        addCard(Object.assign({},clsData.config||{},{code:newCode,className:className}));
+        alert('Code changed to "'+newCode+'" successfully.');
+      });
+    });
+  }).catch(function(e){ alert("Error: "+e.message); });
 };
 
 window.delClass=function(code,name){
