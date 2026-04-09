@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Console — Class Help Queue</title>
+<title>Help Queue — Admin Console</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✋</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -18,7 +19,7 @@
   --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04)
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px 48px}
-#app{width:100%;max-width:600px}
+#app{width:100%;max-width:640px}
 .section{display:none}.section.active{display:block}
 .card{background:var(--surface);border-radius:var(--rl);border:.5px solid var(--border-strong);padding:24px;box-shadow:var(--shadow);margin-bottom:16px}
 .lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px}
@@ -29,44 +30,48 @@ button:active{transform:scale(.97)}
 button:disabled{opacity:.45;cursor:not-allowed}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-primary:hover:not(:disabled){opacity:.88}
+.btn-success{background:var(--success);color:#fff;font-size:12px;padding:5px 12px;border-radius:6px;border:none;cursor:pointer;font-family:inherit;font-weight:500}
+.btn-success:hover{opacity:.85}
 .btn-ghost{background:transparent;color:var(--muted);border:.5px solid var(--border-strong)}
 .btn-ghost:hover{background:var(--bg)}
 .btn-google{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:var(--text);border:.5px solid var(--border-strong);width:100%;padding:11px 18px;font-size:15px;box-shadow:var(--shadow);border-radius:var(--r)}
 .btn-google:hover{background:var(--bg)}
+.btn-remove{font-size:12px;padding:5px 10px;background:var(--danger-light);color:var(--danger);border-radius:6px;border:.5px solid rgba(192,57,43,.2);cursor:pointer;font-family:inherit;font-weight:500;flex-shrink:0}
+.btn-remove:hover{opacity:.8}
+.btn-deny{font-size:12px;padding:5px 10px;background:var(--bg);color:var(--muted);border-radius:6px;border:.5px solid var(--border-strong);cursor:pointer;font-family:inherit;font-weight:500;flex-shrink:0}
+.btn-deny:hover{background:var(--danger-light);color:var(--danger);}
 .divider{border:none;border-top:.5px solid var(--border);margin:16px 0}
 .err{font-size:13px;color:var(--danger);margin-top:8px;display:none}
 .ok{font-size:13px;color:var(--success);margin-top:8px;display:none}
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
 .topbar h1{font-size:20px;font-weight:600;letter-spacing:-.3px}
-.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-right{display:flex;align-items:center;gap:8px}
 .avatar{width:32px;height:32px;border-radius:50%;overflow:hidden;border:.5px solid var(--border-strong)}
 .avatar img{width:100%;height:100%;object-fit:cover}
 .login-center{text-align:center;padding:48px 0 24px;max-width:400px;margin:0 auto}
 .login-center h2{font-size:20px;font-weight:600;margin-bottom:8px}
 .login-center p{font-size:14px;color:var(--muted);margin-bottom:28px}
 .unauth{background:var(--danger-light);border:.5px solid rgba(192,57,43,.2);border-radius:var(--r);padding:12px 16px;font-size:13px;color:var(--danger);margin-top:16px;display:none}
-.teacher-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg);border-radius:var(--r);border:.5px solid var(--border);margin-bottom:8px}
-.teacher-email{flex:1;font-size:14px;font-family:'DM Mono',monospace}
-.teacher-added{font-size:11px;color:var(--muted)}
-.btn-remove{font-size:12px;padding:5px 10px;background:var(--danger-light);color:var(--danger);border-radius:6px;border:.5px solid rgba(192,57,43,.2);cursor:pointer;font-family:inherit;font-weight:500;flex-shrink:0}
-.btn-remove:hover{opacity:.8}
 .empty{text-align:center;padding:24px 0 8px;color:var(--muted);font-size:14px}
 .info-note{background:var(--accent-light);border:.5px solid rgba(45,91,227,.2);border-radius:var(--r);padding:12px 14px;font-size:13px;color:var(--accent-text);margin-bottom:16px;line-height:1.5}
 /* tabs */
 .tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--surface);border-radius:var(--r);padding:4px;border:.5px solid var(--border-strong);box-shadow:var(--shadow)}
-.tab-btn{flex:1;padding:8px 14px;border-radius:7px;border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s,color .15s}
+.tab-btn{flex:1;padding:8px 10px;border-radius:7px;border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s,color .15s;position:relative}
 .tab-btn.active{background:var(--accent);color:#fff}
+.tab-badge{position:absolute;top:4px;right:6px;background:var(--danger);color:#fff;border-radius:99px;font-size:10px;font-weight:700;padding:1px 5px;line-height:1.4;display:none}
+.tab-btn.active .tab-badge{background:rgba(255,255,255,.35);color:#fff}
 .tab-pane{display:none}.tab-pane.active{display:block}
-/* classes table */
-.cls-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg);border-radius:var(--r);border:.5px solid var(--border);margin-bottom:8px}
-.cls-info{flex:1}
-.cls-name{font-weight:600;font-size:14px;margin-bottom:2px}
-.cls-meta{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace}
-.cls-teacher{font-size:12px;color:var(--muted);margin-top:2px}
-.badge-code{font-family:'DM Mono',monospace;font-size:12px;font-weight:600;background:var(--accent-light);color:var(--accent-text);border-radius:6px;padding:2px 8px;border:.5px solid rgba(45,91,227,.2)}
-.badge-q{font-size:11px;font-weight:600;border-radius:99px;padding:2px 8px}
+/* rows */
+.row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg);border-radius:var(--r);border:.5px solid var(--border);margin-bottom:8px}
+.row-info{flex:1;min-width:0}
+.row-main{font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row-sub{font-size:12px;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace}
+.row-sub2{font-size:12px;color:var(--muted);margin-top:1px}
+.badge-code{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;background:var(--accent-light);color:var(--accent-text);border-radius:6px;padding:2px 7px;border:.5px solid rgba(45,91,227,.2);flex-shrink:0}
+.badge-q{font-size:11px;font-weight:600;border-radius:99px;padding:2px 8px;flex-shrink:0}
 .badge-q-warn{background:var(--warn-light);color:var(--warn);border:.5px solid rgba(184,92,0,.2)}
 .badge-q-ok{background:var(--success-light);color:var(--success);border:.5px solid rgba(26,122,74,.2)}
+.request-row{background:var(--warn-light);border-color:rgba(184,92,0,.2)}
 .nav-links{display:flex;gap:16px;justify-content:center;margin-top:8px;font-size:13px}
 .nav-links a{color:var(--muted);text-decoration:none}
 .nav-links a:hover{color:var(--accent)}
@@ -80,8 +85,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
   <div id="s-login" class="section">
     <div class="login-center">
-      <div style="font-size:40px;margin-bottom:16px">🔐</div>
-      <h2>Admin Console</h2>
+      <div style="font-size:48px;margin-bottom:16px">✋</div>
+      <h2>Help Queue — Admin Console</h2>
       <p>Sign in with your admin Google account to manage teachers and classes.</p>
       <button class="btn-google" id="signin-btn" onclick="doSignIn()">
         <svg width="18" height="18" viewBox="0 0 18 18">
@@ -99,7 +104,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
   <div id="s-admin" class="section">
     <div class="topbar">
-      <h1>🔐 Admin Console</h1>
+      <h1>✋ Admin Console</h1>
       <div class="topbar-right">
         <div class="avatar" id="user-avatar" style="display:none"><img id="user-photo" src="" alt=""></div>
         <span id="user-name" style="font-size:13px;color:var(--muted)"></span>
@@ -109,15 +114,17 @@ button:disabled{opacity:.45;cursor:not-allowed}
     </div>
 
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('teachers')">Authorized Teachers</button>
-      <button class="tab-btn" onclick="switchTab('classes')">All Classes</button>
+      <button class="tab-btn active" id="tab-btn-teachers" onclick="switchTab('teachers')">Authorized Teachers</button>
+      <button class="tab-btn" id="tab-btn-requests" onclick="switchTab('requests')">
+        Access Requests
+        <span class="tab-badge" id="requests-badge">0</span>
+      </button>
+      <button class="tab-btn" id="tab-btn-classes" onclick="switchTab('classes')">All Classes</button>
     </div>
 
     <!-- TEACHERS TAB -->
     <div id="tab-teachers" class="tab-pane active">
-      <div class="info-note">
-        Authorized teachers can sign in to the Teacher Portal. Their Google email addresses are stored securely in Firebase and never visible in source code.
-      </div>
+      <div class="info-note">Authorized teachers can sign in to the Teacher Portal. Stored securely in Firebase — never visible in source code.</div>
       <div class="card">
         <div class="lbl">Add Authorized Teacher</div>
         <div style="display:flex;gap:10px;align-items:flex-start">
@@ -130,6 +137,14 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <div class="lbl" style="padding:0 4px;margin-bottom:12px">Authorized Teachers</div>
       <div class="card" style="padding:16px">
         <div id="teacher-list"><div class="empty">Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- REQUESTS TAB -->
+    <div id="tab-requests" class="tab-pane">
+      <div class="info-note">Teachers who tried to sign in but were not yet authorized can request access here. Approve to add them to the authorized list, or deny to dismiss the request.</div>
+      <div class="card" style="padding:16px">
+        <div id="requests-list"><div class="empty">Loading...</div></div>
       </div>
     </div>
 
@@ -158,16 +173,18 @@ var auth=getAuth(fbApp);
 var db=getDatabase(fbApp);
 var prov=new GoogleAuthProvider();
 var me=null;
-var listUnsub=null;
+var teacherUnsub=null;
+var requestsUnsub=null;
 
 function go(id){document.querySelectorAll(".section").forEach(function(s){s.classList.remove("active");});document.getElementById(id).classList.add("active");}
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function fmtDate(ts){return new Date(ts).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}
 
 window.switchTab=function(tab){
-  document.querySelectorAll(".tab-btn").forEach(function(b,i){b.classList.toggle("active",i===(tab==="teachers"?0:1));});
-  document.getElementById("tab-teachers").classList.toggle("active",tab==="teachers");
-  document.getElementById("tab-classes").classList.toggle("active",tab==="classes");
+  ["teachers","requests","classes"].forEach(function(t){
+    document.getElementById("tab-btn-"+t).classList.toggle("active",t===tab);
+    document.getElementById("tab-"+t).classList.toggle("active",t===tab);
+  });
   if(tab==="classes")loadAllClasses();
 };
 
@@ -182,35 +199,36 @@ onAuthStateChanged(auth,function(user){
   if(user){
     get(ref(db,"adminConfig/admins/"+user.uid)).then(function(snap){
       if(!snap.exists()){
-        signOut(auth);
-        document.getElementById("unauth-msg").style.display="block";
-        go("s-login");return;
+        signOut(auth);document.getElementById("unauth-msg").style.display="block";go("s-login");return;
       }
       me=user;
       document.getElementById("user-name").textContent=user.displayName||user.email;
       if(user.photoURL){document.getElementById("user-photo").src=user.photoURL;document.getElementById("user-avatar").style.display="block";}
       go("s-admin");
       listenTeachers();
+      listenRequests();
     }).catch(function(e){console.error(e);signOut(auth);go("s-login");});
   }else{
     me=null;
-    if(listUnsub){listUnsub();listUnsub=null;}
+    if(teacherUnsub){teacherUnsub();teacherUnsub=null;}
+    if(requestsUnsub){requestsUnsub();requestsUnsub=null;}
     go("s-login");
   }
 });
 
+// ── Teachers tab ──
 function listenTeachers(){
-  if(listUnsub)listUnsub();
-  listUnsub=onValue(ref(db,"adminConfig/authorizedEmails"),function(snap){
+  if(teacherUnsub)teacherUnsub();
+  teacherUnsub=onValue(ref(db,"adminConfig/authorizedEmails"),function(snap){
     var el=document.getElementById("teacher-list");
     if(!snap.exists()){el.innerHTML='<div class="empty">No authorized teachers yet. Add one above.</div>';return;}
     var entries=Object.entries(snap.val()).map(function(e){return Object.assign({},e[1],{_key:e[0]});});
     entries.sort(function(a,b){return (a.addedAt||0)-(b.addedAt||0);});
     el.innerHTML=entries.map(function(t){
-      return '<div class="teacher-row">'+
-        '<div>'+
-          '<div class="teacher-email">'+esc(t.email)+'</div>'+
-          (t.addedAt?'<div class="teacher-added">Added '+fmtDate(t.addedAt)+'</div>':'')+
+      return '<div class="row">'+
+        '<div class="row-info">'+
+          '<div class="row-main">'+esc(t.email)+'</div>'+
+          (t.addedAt?'<div class="row-sub2" style="font-family:inherit">Added '+fmtDate(t.addedAt)+'</div>':'')+
         '</div>'+
         '<button class="btn-remove" onclick="removeTeacher(\''+t._key+'\',\''+esc(t.email)+'\')">Remove</button>'+
       '</div>';
@@ -220,8 +238,7 @@ function listenTeachers(){
 
 window.addTeacher=function(){
   var email=document.getElementById("i-email").value.trim().toLowerCase();
-  var errEl=document.getElementById("e-add");
-  var okEl=document.getElementById("ok-add");
+  var errEl=document.getElementById("e-add");var okEl=document.getElementById("ok-add");
   errEl.style.display="none";okEl.style.display="none";
   if(!email){errEl.textContent="Enter an email address.";errEl.style.display="block";return;}
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent="Enter a valid email address.";errEl.style.display="block";return;}
@@ -246,65 +263,114 @@ window.removeTeacher=function(key,email){
   remove(ref(db,"adminConfig/authorizedEmails/"+key));
 };
 
+// ── Requests tab ──
+function listenRequests(){
+  if(requestsUnsub)requestsUnsub();
+  requestsUnsub=onValue(ref(db,"adminConfig/accessRequests"),function(snap){
+    var el=document.getElementById("requests-list");
+    var badge=document.getElementById("requests-badge");
+    if(!snap.exists()){
+      el.innerHTML='<div class="empty">No access requests.</div>';
+      badge.style.display="none";return;
+    }
+    var entries=Object.entries(snap.val()).map(function(e){return Object.assign({},e[1],{_key:e[0]});});
+    var pending=entries.filter(function(r){return r.status==="pending";});
+    var others=entries.filter(function(r){return r.status!=="pending";});
+    if(pending.length>0){badge.textContent=pending.length;badge.style.display="inline";}
+    else{badge.style.display="none";}
+    var all=pending.concat(others);
+    all.sort(function(a,b){return (b.requestedAt||0)-(a.requestedAt||0);});
+    el.innerHTML=all.map(function(r){
+      var isPending=r.status==="pending";
+      return '<div class="row '+(isPending?"request-row":"")+'">'+
+        '<div class="row-info">'+
+          '<div class="row-main">'+(r.displayName?esc(r.displayName)+" — ":"")+esc(r.email)+'</div>'+
+          '<div class="row-sub2" style="font-family:inherit">'+
+            (r.requestedAt?"Requested "+fmtDate(r.requestedAt):"")+" &nbsp;·&nbsp; "+
+            (isPending?'<span style="color:var(--warn);font-weight:600">Pending</span>':
+              r.status==="approved"?'<span style="color:var(--success);font-weight:600">Approved</span>':
+              '<span style="color:var(--muted)">Denied</span>')+
+          '</div>'+
+        '</div>'+
+        (isPending?
+          '<button class="btn-success" onclick="approveRequest(\''+r._key+'\',\''+esc(r.email)+'\')">Approve</button>'+
+          '<button class="btn-deny" onclick="denyRequest(\''+r._key+'\')">Deny</button>':
+          '<button class="btn-remove" onclick="deleteRequest(\''+r._key+'\')">Remove</button>')+
+      '</div>';
+    }).join("");
+  });
+}
+
+window.approveRequest=function(key,email){
+  // Add to authorized emails
+  push(ref(db,"adminConfig/authorizedEmails"),{email:email,addedAt:Date.now()}).then(function(){
+    // Mark request as approved
+    set(ref(db,"adminConfig/accessRequests/"+key+"/status"),"approved");
+  }).catch(function(e){alert("Error: "+e.message);});
+};
+
+window.denyRequest=function(key){
+  set(ref(db,"adminConfig/accessRequests/"+key+"/status"),"denied");
+};
+
+window.deleteRequest=function(key){
+  remove(ref(db,"adminConfig/accessRequests/"+key));
+};
+
+// ── Classes tab ──
 function loadAllClasses(){
   var el=document.getElementById("all-classes-list");
   el.innerHTML='<div class="empty">Loading...</div>';
   get(ref(db,"classes")).then(function(snap){
     if(!snap.exists()){el.innerHTML='<div class="empty">No classes found.</div>';return;}
-    var classes=[];
     var entries=Object.entries(snap.val());
-    var pending=entries.length;
-    if(!pending){el.innerHTML='<div class="empty">No classes found.</div>';return;}
+    var classes=[];
     entries.forEach(function(e){
       var code=e[0];
-      var data=e[1];
+      var data=e[1]||{};
       var config=data.config||{};
       var qCount=data.queue?Object.keys(data.queue).length:0;
-      classes.push({code:code,className:config.className||"(unnamed)",ownerEmail:config.ownerEmail||"Unknown",createdAt:config.createdAt||0,qCount:qCount});
-      pending--;
-      if(pending===0){
-        classes.sort(function(a,b){return (a.ownerEmail||"").localeCompare(b.ownerEmail||"")||a.className.localeCompare(b.className);});
-        renderAllClasses(classes);
-      }
+      classes.push({
+        code:code,
+        className:config.className||"(unnamed)",
+        ownerEmail:config.ownerEmail||"Unknown",
+        createdAt:config.createdAt||0,
+        qCount:qCount
+      });
     });
-  }).catch(function(e){el.innerHTML='<div class="empty">Error loading classes: '+esc(e.message)+'</div>';});
-}
-
-function renderAllClasses(classes){
-  var el=document.getElementById("all-classes-list");
-  if(!classes.length){el.innerHTML='<div class="empty">No classes found.</div>';return;}
-  el.innerHTML=classes.map(function(c){
-    return '<div class="cls-row">'+
-      '<div class="cls-info">'+
-        '<div class="cls-name">'+esc(c.className)+'</div>'+
-        '<div class="cls-meta">'+esc(c.code)+(c.createdAt?' &nbsp;·&nbsp; Created '+fmtDate(c.createdAt):'')+'</div>'+
-        '<div class="cls-teacher">👩‍🏫 '+esc(c.ownerEmail)+'</div>'+
-      '</div>'+
-      '<span class="badge-q '+(c.qCount>0?"badge-q-warn":"badge-q-ok")+'">'+c.qCount+' waiting</span>'+
-      '<button class="btn-remove" onclick="adminDeleteClass(\''+esc(c.code)+'\',\''+esc(c.className)+'\')">Delete</button>'+
-    '</div>';
-  }).join("");
+    classes.sort(function(a,b){
+      return (a.ownerEmail||"").localeCompare(b.ownerEmail||"")||a.className.localeCompare(b.className);
+    });
+    if(!classes.length){el.innerHTML='<div class="empty">No classes found.</div>';return;}
+    el.innerHTML=classes.map(function(c){
+      return '<div class="row">'+
+        '<div class="row-info">'+
+          '<div class="row-main">'+esc(c.className)+'</div>'+
+          '<div class="row-sub">'+esc(c.code)+(c.createdAt?' &nbsp;·&nbsp; '+fmtDate(c.createdAt):'')+'</div>'+
+          '<div class="row-sub2" style="font-family:inherit">&#128104;&#8205;&#127979; '+esc(c.ownerEmail)+'</div>'+
+        '</div>'+
+        '<span class="badge-q '+(c.qCount>0?"badge-q-warn":"badge-q-ok")+'">'+c.qCount+' waiting</span>'+
+        '<button class="btn-remove" onclick="adminDeleteClass(\''+esc(c.code)+'\',\''+esc(c.className)+'\')">Delete</button>'+
+      '</div>';
+    }).join("");
+  }).catch(function(e){el.innerHTML='<div class="empty">Error: '+esc(e.message)+'. Check Firebase rules allow admin to read /classes.</div>';});
 }
 
 window.adminDeleteClass=function(code,name){
-  if(!confirm('Delete class "'+name+'" (code: '+code+') and its entire queue? This cannot be undone.'))return;
-  // Delete class data
+  if(!confirm('Delete class "'+name+'" ('+code+') and its entire queue? This cannot be undone.'))return;
   set(ref(db,"classes/"+code),null).then(function(){
-    // Find and remove from any teacher's list
+    // Remove from any teacher's class list
     get(ref(db,"teacherClasses")).then(function(snap){
       if(!snap.exists())return;
       Object.entries(snap.val()).forEach(function(uidEntry){
-        var uid=uidEntry[0];
-        var classes=uidEntry[1];
+        var uid=uidEntry[0];var classes=uidEntry[1]||{};
         Object.entries(classes).forEach(function(clsEntry){
-          if(clsEntry[1].code===code){
-            remove(ref(db,"teacherClasses/"+uid+"/"+clsEntry[0]));
-          }
+          if(clsEntry[1]&&clsEntry[1].code===code)remove(ref(db,"teacherClasses/"+uid+"/"+clsEntry[0]));
         });
       });
     });
     loadAllClasses();
-  });
+  }).catch(function(e){alert("Error deleting class: "+e.message);});
 };
 </script>
 </body>
