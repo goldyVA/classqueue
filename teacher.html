@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Teacher Portal — Class Help Queue</title>
+<title>Help Queue — Teacher Portal</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✋</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -45,13 +46,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .empty{text-align:center;padding:24px 0 8px;color:var(--muted);font-size:14px}
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
 .topbar h1{font-size:20px;font-weight:600;letter-spacing:-.3px}
-.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .avatar{width:32px;height:32px;border-radius:50%;overflow:hidden;border:.5px solid var(--border-strong)}
 .avatar img{width:100%;height:100%;object-fit:cover}
-.login-center{text-align:center;padding:48px 0 24px;max-width:400px;margin:0 auto}
+.login-center{text-align:center;padding:40px 0 24px;max-width:420px;margin:0 auto}
 .login-center h2{font-size:20px;font-weight:600;margin-bottom:8px}
 .login-center p{font-size:14px;color:var(--muted);margin-bottom:28px}
-.unauth{background:var(--danger-light);border:.5px solid rgba(192,57,43,.2);border-radius:var(--r);padding:12px 16px;font-size:13px;color:var(--danger);margin-top:16px;display:none}
 .class-card{border:.5px solid var(--border-strong);border-radius:var(--rl);background:var(--surface);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow)}
 .class-hdr{display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;transition:background .15s}
 .class-hdr:hover,.class-hdr.open{background:var(--bg)}
@@ -70,6 +70,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .badge{font-size:11px;font-weight:600;border-radius:99px;padding:2px 8px}
 .badge-warn{background:var(--warn-light);color:var(--warn);border:.5px solid rgba(184,92,0,.2)}
 .badge-ok{background:var(--success-light);color:var(--success);border:.5px solid rgba(26,122,74,.2)}
+/* projected */
 #projected{display:none;position:fixed;inset:0;z-index:1000;background:#0f172a;color:#fff;font-family:'DM Sans',sans-serif;flex-direction:column}
 #projected.visible{display:flex}
 .pv-header{display:flex;align-items:center;justify-content:space-between;padding:24px 40px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
@@ -97,22 +98,34 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .pv-count{font-size:15px;font-weight:600;background:rgba(255,255,255,.08);border-radius:99px;padding:4px 14px;opacity:.7;margin-left:auto}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(45,91,227,.4)}50%{box-shadow:0 0 0 12px rgba(45,91,227,0)}}
 .pv-next{animation:pulse 2.5s ease infinite}
-.nav-links{display:flex;gap:16px;justify-content:center;margin-top:4px;font-size:13px}
+.nav-links{display:flex;gap:16px;justify-content:center;margin-top:8px;font-size:13px}
 .nav-links a{color:var(--muted);text-decoration:none}
 .nav-links a:hover{color:var(--accent)}
+/* unauth / request panels */
+.unauth-box{background:var(--danger-light);border:.5px solid rgba(192,57,43,.2);border-radius:var(--rl);padding:24px;margin-bottom:16px;text-align:center}
+.unauth-box h3{font-size:17px;font-weight:600;color:var(--danger);margin-bottom:8px}
+.unauth-box p{font-size:14px;color:var(--danger);opacity:.85;margin-bottom:20px;line-height:1.5}
+.request-box{background:var(--warn-light);border:.5px solid rgba(184,92,0,.2);border-radius:var(--rl);padding:24px;margin-bottom:16px;text-align:center}
+.request-box h3{font-size:17px;font-weight:600;color:var(--warn);margin-bottom:8px}
+.request-box p{font-size:14px;color:var(--warn);opacity:.85;margin-bottom:16px;line-height:1.5}
+.sent-box{background:var(--success-light);border:.5px solid rgba(26,122,74,.2);border-radius:var(--rl);padding:24px;margin-bottom:16px;text-align:center}
+.sent-box h3{font-size:17px;font-weight:600;color:var(--success);margin-bottom:8px}
+.sent-box p{font-size:14px;color:var(--success);opacity:.85;line-height:1.5}
+.btn-request{background:var(--warn);color:#fff;width:100%;margin-top:4px}
+.btn-request:hover{opacity:.88}
 </style>
 </head>
 <body>
 <div id="app">
   <div id="s-loading" class="section active">
-    <div style="text-align:center;padding:80px 0;color:var(--muted);font-size:14px">Loading...</div>
+    <div id="loading-msg" style="text-align:center;padding:80px 0;color:var(--muted);font-size:14px">Loading...</div>
   </div>
 
   <div id="s-login" class="section">
     <div class="login-center">
-      <div style="font-size:40px;margin-bottom:16px">📋</div>
-      <h2>Teacher Portal</h2>
-      <p>Sign in with your Google account to manage your classes and queues.</p>
+      <div style="font-size:48px;margin-bottom:16px">✋</div>
+      <h2>Help Queue — Teacher Portal</h2>
+      <p>Sign in with your Google account to manage your class queues.</p>
       <button class="btn-google" id="signin-btn" onclick="doSignIn()">
         <svg width="18" height="18" viewBox="0 0 18 18">
           <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
@@ -122,18 +135,42 @@ button:disabled{opacity:.45;cursor:not-allowed}
         </svg>
         Sign in with Google
       </button>
-      <div class="unauth" id="unauth-msg">Your account is not authorized as a teacher. Contact your administrator.</div>
     </div>
     <div class="nav-links"><a href="index.html">← Home</a></div>
   </div>
 
+  <!-- Not authorized — show message + request access button -->
+  <div id="s-unauth" class="section">
+    <div style="max-width:440px;margin:40px auto 0">
+      <div class="unauth-box">
+        <h3>Access Not Authorized</h3>
+        <p>Your Google account (<span id="unauth-email" style="font-weight:600"></span>) is not currently authorized to access the Teacher Portal.</p>
+        <button class="btn-ghost" style="width:100%;margin-bottom:8px" onclick="doSignOut()">Sign out and try a different account</button>
+      </div>
+      <div id="request-section">
+        <div class="request-box">
+          <h3>Request Access</h3>
+          <p>If you are a teacher at this school, you can request access below. The administrator will be notified and can approve your account.</p>
+          <button class="btn-request" onclick="submitRequest()">Request Teacher Access</button>
+        </div>
+      </div>
+      <div id="request-sent" style="display:none">
+        <div class="sent-box">
+          <h3>Request Sent ✓</h3>
+          <p>Your access request has been sent to the administrator. You'll need to sign in again once your account has been approved.</p>
+        </div>
+      </div>
+    </div>
+    <div class="nav-links" style="margin-top:16px"><a href="index.html">← Home</a></div>
+  </div>
+
   <div id="s-portal" class="section">
     <div class="topbar">
-      <h1>📋 Teacher Portal</h1>
+      <h1>✋ Help Queue</h1>
       <div class="topbar-right">
         <div class="avatar" id="user-avatar" style="display:none"><img id="user-photo" src="" alt=""></div>
         <span id="user-name" style="font-size:13px;color:var(--muted)"></span>
-        <a id="admin-link" href="admin.html" style="display:none;font-size:12px;color:var(--accent);text-decoration:none;padding:5px 10px;border:.5px solid rgba(45,91,227,.3);border-radius:var(--r);background:var(--accent-light)">Admin &#9881;</a>
+        <a id="admin-link" href="admin.html" style="display:none;font-size:12px;color:var(--accent);text-decoration:none;padding:5px 10px;border:.5px solid rgba(45,91,227,.3);border-radius:var(--r);background:var(--accent-light)">Admin ⚙</a>
         <button class="btn-ghost" style="font-size:12px;padding:5px 10px" onclick="doSignOut()">Sign out</button>
       </div>
     </div>
@@ -186,31 +223,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getDatabase, ref, get, set, push, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-const ADMIN_EMAIL = "steven.goldburg@gmail.com";
+const ADMIN_EMAIL="steven.goldburg@gmail.com";
 const cfg={apiKey:"AIzaSyAMidsyva-82OJVpPgaJMGIxDoWi75Y58I",authDomain:"classqueue-66037.firebaseapp.com",databaseURL:"https://classqueue-66037-default-rtdb.firebaseio.com",projectId:"classqueue-66037",storageBucket:"classqueue-66037.firebasestorage.app",messagingSenderId:"523072247188",appId:"1:523072247188:web:d61bf93c03b6fbe3dc2b81"};
 var fbApp=initializeApp(cfg);
 var auth=getAuth(fbApp);
 var db=getDatabase(fbApp);
 var prov=new GoogleAuthProvider();
-var me=null;
-var unsubs={};
-var pvCode=null;
-var tick=null;
+var me=null;var unsubs={};var pvCode=null;var tick=null;
 
 function go(id){document.querySelectorAll(".section").forEach(function(s){s.classList.remove("active");});document.getElementById(id).classList.add("active");}
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function ago(ts){var s=Math.floor((Date.now()-ts)/1000);if(s<60)return "waiting "+s+"s";var m=Math.floor(s/60);if(m<60)return "waiting "+m+"m";return "waiting "+Math.floor(m/60)+"h";}
 function agoShort(ts){var s=Math.floor((Date.now()-ts)/1000);if(s<60)return s+"s ago";var m=Math.floor(s/60);if(m<60)return m+"m ago";return Math.floor(m/60)+"h ago";}
-
-function startTick(){
-  if(tick)clearInterval(tick);
-  tick=setInterval(function(){
-    document.querySelectorAll("[data-ts]").forEach(function(el){
-      var ts=parseInt(el.getAttribute("data-ts"),10);
-      el.textContent=el.classList.contains("pv-item-time")||el.classList.contains("pv-next-wait")?ago(ts):agoShort(ts);
-    });
-  },5000);
-}
+function startTick(){if(tick)clearInterval(tick);tick=setInterval(function(){document.querySelectorAll("[data-ts]").forEach(function(el){var ts=parseInt(el.getAttribute("data-ts"),10);el.textContent=el.classList.contains("pv-item-time")||el.classList.contains("pv-next-wait")?ago(ts):agoShort(ts);});},5000);}
 function stopTick(){if(tick){clearInterval(tick);tick=null;}}
 
 window.doSignIn=function(){
@@ -226,8 +251,7 @@ onAuthStateChanged(auth,function(user){
       get(ref(db,"adminConfig/authorizedEmails")),
       get(ref(db,"adminConfig/admins/"+user.uid))
     ]).then(function(results){
-      var emailSnap=results[0];
-      var adminSnap=results[1];
+      var emailSnap=results[0];var adminSnap=results[1];
       var allowed=false;
       if(adminSnap.exists())allowed=true;
       if(!allowed&&emailSnap.exists()){
@@ -237,34 +261,52 @@ onAuthStateChanged(auth,function(user){
         });
       }
       if(!allowed){
-        signOut(auth);
-        document.getElementById("unauth-msg").style.display="block";
-        go("s-login");return;
+        // Show unauthorized screen with request option
+        document.getElementById("unauth-email").textContent=user.email;
+        // Check if already requested
+        get(ref(db,"adminConfig/accessRequests")).then(function(reqSnap){
+          var alreadyRequested=false;
+          if(reqSnap.exists()){
+            Object.values(reqSnap.val()).forEach(function(v){
+              if(v.email&&v.email.toLowerCase()===user.email.toLowerCase()&&v.status==="pending")alreadyRequested=true;
+            });
+          }
+          if(alreadyRequested){
+            document.getElementById("request-section").style.display="none";
+            document.getElementById("request-sent").style.display="block";
+          }
+          go("s-unauth");
+        });
+        return;
       }
       me=user;
       document.getElementById("user-name").textContent=user.displayName||user.email;
       if(user.photoURL){document.getElementById("user-photo").src=user.photoURL;document.getElementById("user-avatar").style.display="block";}
-      // Show admin link only for admin email
-      if(user.email.toLowerCase()===ADMIN_EMAIL.toLowerCase()){
-        document.getElementById("admin-link").style.display="block";
-      }
-      go("s-portal");
-      loadClasses();
-      startTick();
+      if(user.email.toLowerCase()===ADMIN_EMAIL.toLowerCase()){document.getElementById("admin-link").style.display="inline-flex";}
+      go("s-portal");loadClasses();startTick();
     }).catch(function(e){
       console.error("Auth check failed:",e);
-      document.querySelector("#s-loading div").textContent="Error: "+e.message+". Try refreshing.";
+      document.getElementById("loading-msg").textContent="Error: "+e.message+". Try refreshing.";
       go("s-loading");
     });
   }else{
-    me=null;
-    Object.values(unsubs).forEach(function(u){if(u)u();});
-    unsubs={};
-    closeProjected();
-    stopTick();
-    go("s-login");
+    me=null;Object.values(unsubs).forEach(function(u){if(u)u();});unsubs={};closeProjected();stopTick();go("s-login");
   }
 });
+
+window.submitRequest=function(){
+  if(!me)return;
+  push(ref(db,"adminConfig/accessRequests"),{
+    email:me.email,
+    displayName:me.displayName||"",
+    uid:me.uid,
+    requestedAt:Date.now(),
+    status:"pending"
+  }).then(function(){
+    document.getElementById("request-section").style.display="none";
+    document.getElementById("request-sent").style.display="block";
+  }).catch(function(e){alert("Error submitting request: "+e.message);});
+};
 
 function loadClasses(){
   get(ref(db,"teacherClasses/"+me.uid)).then(function(snap){
@@ -300,18 +342,13 @@ function addCard(cls){
         '<button class="btn-del" onclick="delClass(\''+cls.code+'\',\''+esc(cls.className)+'\')">Delete Class</button>' +
       '</div>' +
     '</div>';
-  el.appendChild(d);
-  listenQ(cls.code);
+  el.appendChild(d);listenQ(cls.code);
 }
 
 window.toggleCls=function(code){
-  var body=document.getElementById("body-"+code);
-  var chev=document.getElementById("chev-"+code);
-  var hdr=document.getElementById("hdr-"+code);
+  var body=document.getElementById("body-"+code);var chev=document.getElementById("chev-"+code);var hdr=document.getElementById("hdr-"+code);
   var open=body.style.display!=="none";
-  body.style.display=open?"none":"block";
-  chev.classList.toggle("open",!open);
-  hdr.classList.toggle("open",!open);
+  body.style.display=open?"none":"block";chev.classList.toggle("open",!open);hdr.classList.toggle("open",!open);
 };
 
 function listenQ(code){
@@ -320,28 +357,17 @@ function listenQ(code){
     var raw=snap.exists()?snap.val():{};
     var q=Object.entries(raw).map(function(e){return Object.assign({},e[1],{_key:e[0]});});
     q.sort(function(a,b){return a.ts-b.ts;});
-    renderQ(code,q);
-    if(pvCode===code)renderProjected(q);
+    renderQ(code,q);if(pvCode===code)renderProjected(q);
   });
 }
 
 function renderQ(code,q){
-  var badge=document.getElementById("badge-"+code);
-  var qEl=document.getElementById("q-"+code);
+  var badge=document.getElementById("badge-"+code);var qEl=document.getElementById("q-"+code);
   if(!badge||!qEl)return;
-  badge.textContent=q.length+" waiting";
-  badge.className="badge "+(q.length===0?"badge-ok":"badge-warn");
+  badge.textContent=q.length+" waiting";badge.className="badge "+(q.length===0?"badge-ok":"badge-warn");
   if(!q.length){qEl.innerHTML='<div class="empty">Queue is empty</div>';return;}
   var html="";
-  for(var i=0;i<q.length;i++){
-    var item=q[i];
-    html+='<div class="q-row '+(i===0?"first":"")+'">'+
-      '<span class="qr-num">'+(i+1)+'</span>'+
-      '<span class="qr-name">'+esc(item.name)+'</span>'+
-      '<span class="qr-time" data-ts="'+item.ts+'">'+agoShort(item.ts)+'</span>'+
-      '<button class="btn-done" onclick="doneStudent(\''+code+'\',\''+item._key+'\')">Done &#10003;</button>'+
-    '</div>';
-  }
+  for(var i=0;i<q.length;i++){var item=q[i];html+='<div class="q-row '+(i===0?"first":"")+'"><span class="qr-num">'+(i+1)+'</span><span class="qr-name">'+esc(item.name)+'</span><span class="qr-time" data-ts="'+item.ts+'">'+agoShort(item.ts)+'</span><button class="btn-done" onclick="doneStudent(\''+code+'\',\''+item._key+'\')">Done &#10003;</button></div>';}
   qEl.innerHTML=html;
 }
 
@@ -349,63 +375,38 @@ window.doneStudent=function(code,key){remove(ref(db,"classes/"+code+"/queue/"+ke
 window.clearQ=function(code){if(!confirm("Clear the entire queue for this class?"))return;set(ref(db,"classes/"+code+"/queue"),null);};
 
 window.openProjected=function(code,name){
-  pvCode=code;
-  document.getElementById("pv-title").textContent=name;
-  document.getElementById("pv-code").textContent=code;
-  document.getElementById("projected").classList.add("visible");
-  document.body.style.overflow="hidden";
+  pvCode=code;document.getElementById("pv-title").textContent=name;document.getElementById("pv-code").textContent=code;
+  document.getElementById("projected").classList.add("visible");document.body.style.overflow="hidden";
   get(ref(db,"classes/"+code+"/queue")).then(function(snap){
     var raw=snap.exists()?snap.val():{};
     var q=Object.entries(raw).map(function(e){return Object.assign({},e[1],{_key:e[0]});});
-    q.sort(function(a,b){return a.ts-b.ts;});
-    renderProjected(q);
+    q.sort(function(a,b){return a.ts-b.ts;});renderProjected(q);
   });
 };
-
-window.closeProjected=function(){
-  pvCode=null;
-  document.getElementById("projected").classList.remove("visible");
-  document.body.style.overflow="";
-};
+window.closeProjected=function(){pvCode=null;document.getElementById("projected").classList.remove("visible");document.body.style.overflow="";};
 
 function renderProjected(q){
-  var countEl=document.getElementById("pv-count");
-  var emptyEl=document.getElementById("pv-empty");
-  var nextEl=document.getElementById("pv-next");
-  var restEl=document.getElementById("pv-rest");
-  var nextName=document.getElementById("pv-next-name");
-  var nextWait=document.getElementById("pv-next-wait");
-  var listEl=document.getElementById("pv-list");
+  var countEl=document.getElementById("pv-count");var emptyEl=document.getElementById("pv-empty");var nextEl=document.getElementById("pv-next");var restEl=document.getElementById("pv-rest");
   countEl.textContent=q.length+" waiting";
   if(!q.length){emptyEl.style.display="flex";nextEl.style.display="none";restEl.style.display="none";return;}
   emptyEl.style.display="none";nextEl.style.display="flex";
-  nextName.textContent=q[0].name;
-  nextWait.setAttribute("data-ts",q[0].ts);
-  nextWait.textContent=ago(q[0].ts);
+  document.getElementById("pv-next-name").textContent=q[0].name;
+  var nw=document.getElementById("pv-next-wait");nw.setAttribute("data-ts",q[0].ts);nw.textContent=ago(q[0].ts);
   if(q.length>1){
-    restEl.style.display="block";
-    var html="";
-    for(var i=1;i<q.length;i++){
-      var item=q[i];
-      html+='<div class="pv-item">'+
-        '<span class="pv-item-num">'+(i+1)+'</span>'+
-        '<span class="pv-item-name">'+esc(item.name)+'</span>'+
-        '<span class="pv-item-time" data-ts="'+item.ts+'">'+ago(item.ts)+'</span>'+
-        '<button class="pv-item-done" onclick="doneStudent(\''+pvCode+'\',\''+item._key+'\')">Done &#10003;</button>'+
-      '</div>';
-    }
-    listEl.innerHTML=html;
+    restEl.style.display="block";var html="";
+    for(var i=1;i<q.length;i++){var item=q[i];html+='<div class="pv-item"><span class="pv-item-num">'+(i+1)+'</span><span class="pv-item-name">'+esc(item.name)+'</span><span class="pv-item-time" data-ts="'+item.ts+'">'+ago(item.ts)+'</span><button class="pv-item-done" onclick="doneStudent(\''+pvCode+'\',\''+item._key+'\')">Done &#10003;</button></div>';}
+    document.getElementById("pv-list").innerHTML=html;
   }else{restEl.style.display="none";}
 }
 
 window.changeCode=function(oldCode,className){
-  var newCode=prompt('Enter a new class code for "'+className+'":\n(2-10 letters/numbers, no spaces)','');
+  var newCode=prompt('New class code for "'+className+'":\n(2-10 letters/numbers, no spaces)','');
   if(!newCode)return;
   newCode=newCode.trim().toUpperCase();
   if(!/^[A-Z0-9]{2,10}$/.test(newCode)){alert("Code must be 2-10 letters/numbers, no spaces.");return;}
   if(newCode===oldCode){alert("That is already the current code.");return;}
   get(ref(db,"classes/"+newCode+"/config")).then(function(snap){
-    if(snap.exists()){alert('Code "'+newCode+'" is already in use. Choose another.');return;}
+    if(snap.exists()){alert('Code "'+newCode+'" is already in use.');return;}
     get(ref(db,"classes/"+oldCode)).then(function(clsSnap){
       var clsData=clsSnap.exists()?clsSnap.val():{};
       if(clsData.config)clsData.config.code=newCode;
@@ -413,10 +414,9 @@ window.changeCode=function(oldCode,className){
         remove(ref(db,"classes/"+oldCode));
         get(ref(db,"teacherClasses/"+me.uid)).then(function(tcSnap){
           if(tcSnap.exists()){
-            var entries=Object.entries(tcSnap.val());
-            for(var i=0;i<entries.length;i++){
-              if(entries[i][1].code===oldCode){set(ref(db,"teacherClasses/"+me.uid+"/"+entries[i][0]),Object.assign({},entries[i][1],{code:newCode}));break;}
-            }
+            Object.entries(tcSnap.val()).forEach(function(e){
+              if(e[1].code===oldCode)set(ref(db,"teacherClasses/"+me.uid+"/"+e[0]),Object.assign({},e[1],{code:newCode}));
+            });
           }
         });
         if(unsubs[oldCode]){unsubs[oldCode]();delete unsubs[oldCode];}
@@ -424,7 +424,7 @@ window.changeCode=function(oldCode,className){
         var card=document.getElementById("cls-"+oldCode);if(card)card.remove();
         var el=document.getElementById("classes-list");
         if(el.querySelector("[style*='padding:32px']"))el.innerHTML="";
-        addCard(Object.assign({},clsData.config||{},{code:newCode,className:className}));
+        addCard(Object.assign({},clsData.config||{},{code:newCode,className:className,ownerEmail:me.email,ownerUid:me.uid}));
         alert('Code changed to "'+newCode+'" successfully.');
       });
     });
@@ -439,15 +439,12 @@ window.createClass=function(){
   if(!code){err.textContent="Enter a class code.";return;}
   if(!/^[A-Z0-9]{2,10}$/.test(code)){err.textContent="Code must be 2-10 letters/numbers, no spaces.";return;}
   get(ref(db,"classes/"+code+"/config")).then(function(snap){
-    if(snap.exists()){err.textContent='Code "'+code+'" is already in use. Choose another.';return;}
+    if(snap.exists()){err.textContent='Code "'+code+'" is already in use.';return;}
     var data={className:name,code:code,ownerUid:me.uid,ownerEmail:me.email,createdAt:Date.now()};
     set(ref(db,"classes/"+code+"/config"),data).then(function(){
       push(ref(db,"teacherClasses/"+me.uid),data).then(function(){
-        err.textContent="";
-        document.getElementById("i-cname").value="";
-        document.getElementById("i-ccode").value="";
-        var el=document.getElementById("classes-list");
-        if(el.querySelector("[style*='padding:32px']"))el.innerHTML="";
+        err.textContent="";document.getElementById("i-cname").value="";document.getElementById("i-ccode").value="";
+        var el=document.getElementById("classes-list");if(el.querySelector("[style*='padding:32px']"))el.innerHTML="";
         addCard(data);
       });
     });
@@ -459,10 +456,7 @@ window.delClass=function(code,name){
   if(pvCode===code)closeProjected();
   set(ref(db,"classes/"+code),null).then(function(){
     get(ref(db,"teacherClasses/"+me.uid)).then(function(snap){
-      if(snap.exists()){
-        var entries=Object.entries(snap.val());
-        for(var i=0;i<entries.length;i++){if(entries[i][1].code===code){remove(ref(db,"teacherClasses/"+me.uid+"/"+entries[i][0]));break;}}
-      }
+      if(snap.exists()){Object.entries(snap.val()).forEach(function(e){if(e[1].code===code)remove(ref(db,"teacherClasses/"+me.uid+"/"+e[0]));});}
       if(unsubs[code]){unsubs[code]();delete unsubs[code];}
       var card=document.getElementById("cls-"+code);if(card)card.remove();
       if(!document.getElementById("classes-list").children.length){
