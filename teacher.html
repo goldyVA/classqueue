@@ -262,6 +262,7 @@ var me = null;
 var unsubs = {};
 var pvUnsub = null;
 var pvCode  = null;
+var tickInterval = null;
 
 function go(id) {
   document.querySelectorAll(".section").forEach(function(s){ s.classList.remove("active"); });
@@ -286,6 +287,29 @@ function agoShort(ts) {
   var m = Math.floor(s / 60);
   if (m < 60) return m + "m ago";
   return Math.floor(m/60) + "h ago";
+}
+
+function tickTimes() {
+  // Update all data-ts time elements in the portal queue rows
+  var els = document.querySelectorAll("[data-ts]");
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    var ts = parseInt(el.getAttribute("data-ts"), 10);
+    if (el.classList.contains("pv-item-time") || el.classList.contains("pv-next-wait")) {
+      el.textContent = ago(ts);
+    } else {
+      el.textContent = agoShort(ts);
+    }
+  }
+}
+
+function startTick() {
+  if (tickInterval) clearInterval(tickInterval);
+  tickInterval = setInterval(tickTimes, 5000);
+}
+
+function stopTick() {
+  if (tickInterval) { clearInterval(tickInterval); tickInterval = null; }
 }
 
 window.doSignIn = function() {
@@ -314,11 +338,13 @@ onAuthStateChanged(auth, function(user) {
     }
     go("s-portal");
     loadClasses();
+    startTick();
   } else {
     me = null;
     Object.values(unsubs).forEach(function(u){ if(u) u(); });
     unsubs = {};
     closeProjected();
+    stopTick();
     go("s-login");
   }
 });
@@ -402,7 +428,7 @@ function renderQ(code, q) {
       '<div class="q-row ' + (i===0?"first":"") + '">' +
         '<span class="qr-num">' + (i+1) + '</span>' +
         '<span class="qr-name">' + esc(item.name) + '</span>' +
-        '<span class="qr-time">' + agoShort(item.ts) + '</span>' +
+        '<span class="qr-time" data-ts="' + item.ts + '">' + agoShort(item.ts) + '</span>' +
         '<button class="btn-done" onclick="doneStudent(\'' + code + '\',\'' + item._key + '\')">Done &#10003;</button>' +
       '</div>';
   }
@@ -462,6 +488,7 @@ function renderProjected(q) {
   emptyEl.style.display = "none";
   nextEl.style.display  = "flex";
   nextName.textContent  = q[0].name;
+  nextWait.setAttribute("data-ts", q[0].ts);
   nextWait.textContent  = ago(q[0].ts);
 
   if (q.length > 1) {
@@ -473,7 +500,7 @@ function renderProjected(q) {
         '<div class="pv-item">' +
           '<span class="pv-item-num">' + (i+1) + '</span>' +
           '<span class="pv-item-name">' + esc(item.name) + '</span>' +
-          '<span class="pv-item-time">' + ago(item.ts) + '</span>' +
+          '<span class="pv-item-time" data-ts="' + item.ts + '">' + ago(item.ts) + '</span>' +
           '<button class="pv-item-done" onclick="doneStudent(\'' + pvCode + '\',\'' + item._key + '\')">Done &#10003;</button>' +
         '</div>';
     }
