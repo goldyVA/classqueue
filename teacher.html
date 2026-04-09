@@ -246,34 +246,43 @@ window.doSignOut = function(){ signOut(auth); };
 
 onAuthStateChanged(auth, function(user) {
   if (user) {
-    // Check authorization against Firebase — no emails in source code
-    get(ref(db, "adminConfig/authorizedEmails")).then(function(snap) {
+    // Check both authorized emails list and admin status in parallel
+    Promise.all([
+      get(ref(db, "adminConfig/authorizedEmails")),
+      get(ref(db, "adminConfig/admins/"+user.uid))
+    ]).then(function(results) {
+      var emailSnap = results[0];
+      var adminSnap = results[1];
       var allowed = false;
-      if (snap.exists()) {
-        var data = snap.val();
-        Object.values(data).forEach(function(v){ if(v===user.email) allowed=true; });
+      // Check admin
+      if (adminSnap.exists()) allowed = true;
+      // Check authorized emails list — stored as objects {email, addedAt}
+      if (!allowed && emailSnap.exists()) {
+        var data = emailSnap.val();
+        Object.values(data).forEach(function(v){
+          var storedEmail = typeof v === "object" ? v.email : v;
+          if (storedEmail && storedEmail.toLowerCase() === user.email.toLowerCase()) allowed = true;
+        });
       }
-      // Also allow admins
-      get(ref(db, "adminConfig/admins/"+user.uid)).then(function(adminSnap){
-        if (adminSnap.exists()) allowed = true;
-        if (!allowed) {
-          signOut(auth);
-          document.getElementById("unauth-msg").style.display="block";
-          go("s-login"); return;
-        }
-        me = user;
-        document.getElementById("user-name").textContent = user.displayName||user.email;
-        if (user.photoURL) {
-          document.getElementById("user-photo").src = user.photoURL;
-          document.getElementById("user-avatar").style.display="block";
-        }
-        go("s-portal");
-        loadClasses();
-        startTick();
-      });
+      if (!allowed) {
+        signOut(auth);
+        document.getElementById("unauth-msg").style.display="block";
+        go("s-login"); return;
+      }
+      me = user;
+      document.getElementById("user-name").textContent = user.displayName||user.email;
+      if (user.photoURL) {
+        document.getElementById("user-photo").src = user.photoURL;
+        document.getElementById("user-avatar").style.display="block";
+      }
+      go("s-portal");
+      loadClasses();
+      startTick();
     }).catch(function(e){
-      console.error("Auth check failed:",e);
-      signOut(auth); go("s-login");
+      console.error("Auth check failed:", e);
+      // Don't sign out on error — show a useful message instead
+      go("s-loading");
+      document.querySelector("#s-loading div").textContent = "Error checking authorization: " + e.message + ". Try refreshing.";
     });
   } else {
     me=null;
