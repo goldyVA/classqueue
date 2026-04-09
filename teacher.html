@@ -3,166 +3,98 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Teacher Portal — Class Help Queue</title>
+<title>Teacher Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #F7F5F0; --surface: #FFFFFF; --border: rgba(0,0,0,0.10);
-    --border-strong: rgba(0,0,0,0.18); --text: #1A1917; --muted: #6B6860;
-    --accent: #2D5BE3; --accent-light: #EEF2FD; --accent-text: #1A3BB0;
-    --danger: #C0392B; --danger-light: #FEF0EE;
-    --success: #1A7A4A; --success-light: #EDFAF3;
-    --warn: #B85C00; --warn-light: #FEF7EE;
-    --radius: 10px; --radius-lg: 16px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
-  }
-  body {
-    font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text);
-    min-height: 100vh; display: flex; flex-direction: column;
-    align-items: center; padding: 24px 16px 48px;
-  }
-  .topbar {
-    width: 100%; max-width: 560px; display: flex; align-items: center;
-    justify-content: space-between; margin-bottom: 28px;
-  }
-  .topbar h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; }
-  .topbar-right { display: flex; align-items: center; gap: 10px; }
-  .avatar { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; border: 0.5px solid var(--border-strong); }
-  .avatar img { width: 100%; height: 100%; object-fit: cover; }
-  .card {
-    background: var(--surface); border-radius: var(--radius-lg);
-    border: 0.5px solid var(--border-strong); padding: 24px;
-    box-shadow: var(--shadow); width: 100%; max-width: 560px; margin-bottom: 16px;
-  }
-  .card-label {
-    font-size: 11px; font-weight: 600; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px;
-  }
-  input[type="text"] {
-    width: 100%; padding: 10px 14px; border: 0.5px solid var(--border-strong);
-    border-radius: var(--radius); font-family: inherit; font-size: 15px;
-    color: var(--text); background: var(--bg); outline: none;
-    transition: border-color 0.15s; margin-bottom: 12px;
-  }
-  input:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px rgba(45,91,227,0.12); }
-  button {
-    font-family: inherit; font-size: 14px; font-weight: 500;
-    cursor: pointer; border-radius: var(--radius); padding: 10px 18px;
-    border: none; transition: opacity 0.15s, transform 0.1s;
-  }
-  button:active { transform: scale(0.97); }
-  button:disabled { opacity: 0.45; cursor: not-allowed; }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover:not(:disabled) { opacity: 0.88; }
-  .btn-ghost { background: transparent; color: var(--muted); border: 0.5px solid var(--border-strong); }
-  .btn-ghost:hover { background: var(--bg); }
-  .btn-google {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    background: #fff; color: var(--text); border: 0.5px solid var(--border-strong);
-    width: 100%; padding: 11px 18px; font-size: 15px; box-shadow: var(--shadow);
-  }
-  .btn-google:hover { background: var(--bg); }
-  .btn-danger-sm {
-    font-size: 12px; padding: 5px 10px; background: var(--danger-light); color: var(--danger);
-    border-radius: 6px; border: 0.5px solid rgba(192,57,43,0.2); cursor: pointer;
-    font-family: inherit; font-weight: 500; flex-shrink: 0;
-  }
-  .btn-danger-sm:hover { opacity: 0.8; }
-  .done-btn {
-    font-size: 12px; padding: 6px 12px; background: var(--success-light); color: var(--success);
-    border-radius: 6px; border: 0.5px solid rgba(26,122,74,0.2); cursor: pointer;
-    font-family: inherit; font-weight: 500; flex-shrink: 0;
-  }
-  .done-btn:hover { opacity: 0.8; }
-  .divider { border: none; border-top: 0.5px solid var(--border); margin: 16px 0; }
-  .meta-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
-  .link-btn { background: none; border: none; color: var(--accent); font-family: inherit; font-size: 12px; cursor: pointer; padding: 0; text-decoration: underline; }
-  .code-box {
-    font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500;
-    letter-spacing: 0.15em; color: var(--accent); background: var(--accent-light);
-    border-radius: var(--radius); padding: 8px 14px; text-align: center;
-    border: 0.5px solid rgba(45,91,227,0.2); display: inline-block;
-  }
-  .status-bar {
-    display: flex; align-items: center; gap: 8px; padding: 10px 14px;
-    border-radius: var(--radius); font-size: 13px; font-weight: 500; margin-bottom: 16px;
-  }
-  .s-next { background: var(--accent-light); color: var(--accent-text); border: 0.5px solid rgba(45,91,227,0.2); }
-  .empty { text-align: center; padding: 28px 0 12px; color: var(--muted); font-size: 14px; }
-  .err { font-size: 13px; color: var(--danger); margin-top: 8px; }
-  #app { width: 100%; max-width: 560px; }
-  .section { display: none; }
-  .section.active { display: block; }
-  .class-card {
-    border: 0.5px solid var(--border-strong); border-radius: var(--radius-lg);
-    background: var(--surface); margin-bottom: 12px; overflow: hidden;
-    box-shadow: var(--shadow);
-  }
-  .class-card-header {
-    display: flex; align-items: center; gap: 12px; padding: 16px 20px;
-    cursor: pointer; transition: background 0.15s;
-  }
-  .class-card-header:hover { background: var(--bg); }
-  .class-card-header.open { background: var(--bg); }
-  .class-info { flex: 1; }
-  .class-name { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
-  .class-meta { font-size: 12px; color: var(--muted); }
-  .class-body { border-top: 0.5px solid var(--border); padding: 16px 20px; }
-  .queue-row {
-    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-    background: var(--bg); border-radius: var(--radius); margin-bottom: 8px;
-    border: 0.5px solid var(--border); animation: slideIn 0.2s ease;
-  }
-  .queue-row.first { background: var(--accent-light); border-color: rgba(45,91,227,0.25); }
-  .queue-row.first .qr-name { color: var(--accent-text); }
-  @keyframes slideIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
-  .qr-num  { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); min-width:20px; }
-  .qr-name { flex:1; font-weight:500; font-size:14px; }
-  .qr-time { font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; }
-  .chevron { font-size: 12px; color: var(--muted); transition: transform 0.2s; display: inline-block; }
-  .chevron.open { transform: rotate(180deg); }
-  .queue-count-badge {
-    font-size: 11px; font-weight: 600; background: var(--warn-light); color: var(--warn);
-    border-radius: 99px; padding: 2px 8px; border: 0.5px solid rgba(184,92,0,0.2);
-  }
-  .queue-count-badge.zero { background: var(--success-light); color: var(--success); border-color: rgba(26,122,74,0.2); }
-  .login-wrap { text-align: center; padding: 48px 0 24px; }
-  .login-wrap h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
-  .login-wrap p { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
-  .unauth-banner {
-    background: var(--danger-light); border: 0.5px solid rgba(192,57,43,0.2);
-    border-radius: var(--radius); padding: 12px 16px; font-size: 13px;
-    color: var(--danger); margin-top: 16px; display: none;
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F7F5F0;--surface:#fff;--border:rgba(0,0,0,.10);--border-strong:rgba(0,0,0,.18);
+  --text:#1A1917;--muted:#6B6860;
+  --accent:#2D5BE3;--accent-light:#EEF2FD;--accent-text:#1A3BB0;
+  --danger:#C0392B;--danger-light:#FEF0EE;
+  --success:#1A7A4A;--success-light:#EDFAF3;
+  --warn:#B85C00;--warn-light:#FEF7EE;
+  --r:10px;--rl:16px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04)
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px 48px}
+#app{width:100%;max-width:560px}
+.section{display:none}.section.active{display:block}
+.card{background:var(--surface);border-radius:var(--rl);border:.5px solid var(--border-strong);padding:24px;box-shadow:var(--shadow);margin-bottom:16px}
+.label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px}
+input[type=text]{width:100%;padding:10px 14px;border:.5px solid var(--border-strong);border-radius:var(--r);font-family:inherit;font-size:15px;color:var(--text);background:var(--bg);outline:none;transition:border-color .15s;margin-bottom:12px}
+input:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(45,91,227,.12)}
+button{font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;border-radius:var(--r);padding:10px 18px;border:none;transition:opacity .15s,transform .1s}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover:not(:disabled){opacity:.88}
+.btn-ghost{background:transparent;color:var(--muted);border:.5px solid var(--border-strong)}
+.btn-ghost:hover{background:var(--bg)}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:var(--text);border:.5px solid var(--border-strong);width:100%;padding:11px 18px;font-size:15px;box-shadow:var(--shadow);border-radius:var(--r)}
+.btn-google:hover{background:var(--bg)}
+.btn-done{font-size:12px;padding:6px 12px;background:var(--success-light);color:var(--success);border-radius:6px;border:.5px solid rgba(26,122,74,.2);cursor:pointer;font-family:inherit;font-weight:500;flex-shrink:0}
+.btn-done:hover{opacity:.8}
+.btn-del{font-size:12px;padding:5px 10px;background:var(--danger-light);color:var(--danger);border-radius:6px;border:.5px solid rgba(192,57,43,.2);cursor:pointer;font-family:inherit;font-weight:500;flex-shrink:0}
+.btn-del:hover{opacity:.8}
+.divider{border:none;border-top:.5px solid var(--border);margin:16px 0}
+.err{font-size:13px;color:var(--danger);margin-top:8px}
+.empty{text-align:center;padding:24px 0 8px;color:var(--muted);font-size:14px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.topbar h1{font-size:20px;font-weight:600;letter-spacing:-.3px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.avatar{width:32px;height:32px;border-radius:50%;overflow:hidden;border:.5px solid var(--border-strong)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.login-center{text-align:center;padding:48px 0 24px;max-width:400px;margin:0 auto}
+.login-center h2{font-size:20px;font-weight:600;margin-bottom:8px}
+.login-center p{font-size:14px;color:var(--muted);margin-bottom:28px}
+.unauth{background:var(--danger-light);border:.5px solid rgba(192,57,43,.2);border-radius:var(--r);padding:12px 16px;font-size:13px;color:var(--danger);margin-top:16px;display:none}
+.class-card{border:.5px solid var(--border-strong);border-radius:var(--rl);background:var(--surface);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow)}
+.class-hdr{display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;transition:background .15s}
+.class-hdr:hover,.class-hdr.open{background:var(--bg)}
+.class-info{flex:1}
+.class-name{font-weight:600;font-size:15px;margin-bottom:2px}
+.class-meta{font-size:12px;color:var(--muted)}
+.class-body{border-top:.5px solid var(--border);padding:16px 20px}
+.q-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border-radius:var(--r);margin-bottom:8px;border:.5px solid var(--border)}
+.q-row.first{background:var(--accent-light);border-color:rgba(45,91,227,.25)}
+.q-row.first .qr-name{color:var(--accent-text)}
+.qr-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);min-width:20px}
+.qr-name{flex:1;font-weight:500;font-size:14px}
+.qr-time{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+.chev{font-size:12px;color:var(--muted);transition:transform .2s;display:inline-block}
+.chev.open{transform:rotate(180deg)}
+.badge{font-size:11px;font-weight:600;border-radius:99px;padding:2px 8px}
+.badge-warn{background:var(--warn-light);color:var(--warn);border:.5px solid rgba(184,92,0,.2)}
+.badge-ok{background:var(--success-light);color:var(--success);border:.5px solid rgba(26,122,74,.2)}
+.debug{background:#1a1917;color:#a8e6a3;font-family:'DM Mono',monospace;font-size:12px;border-radius:var(--r);padding:12px 14px;margin-top:16px;line-height:1.8;white-space:pre-wrap;word-break:break-all}
 </style>
 </head>
 <body>
 <div id="app">
 
-  <div id="s-loading" class="section active" style="text-align:center;padding:80px 0;color:var(--muted);font-size:14px;">
-    Loading...
+  <div id="s-loading" class="section active">
+    <div style="text-align:center;padding:80px 0;color:var(--muted);font-size:14px">
+      Loading...
+      <div id="debug-log" class="debug" style="margin-top:24px;text-align:left;display:none"></div>
+    </div>
   </div>
 
   <div id="s-login" class="section">
-    <div style="max-width:400px;margin:0 auto;">
-      <div class="login-wrap">
-        <div style="font-size:40px;margin-bottom:16px">📋</div>
-        <h2>Teacher Portal</h2>
-        <p>Sign in with your Google account to manage your classes and queues.</p>
-        <button class="btn-google" id="signin-btn" onclick="signInWithGoogle()">
-          <svg width="18" height="18" viewBox="0 0 18 18">
-            <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
-            <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
-            <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
-            <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
-          </svg>
-          Sign in with Google
-        </button>
-        <div class="unauth-banner" id="unauth-banner">
-          Your Google account is not authorized as a teacher. Contact your administrator.
-        </div>
-      </div>
+    <div class="login-center">
+      <div style="font-size:40px;margin-bottom:16px">📋</div>
+      <h2>Teacher Portal</h2>
+      <p>Sign in with your Google account to manage your classes and queues.</p>
+      <button class="btn-google" id="signin-btn" onclick="doSignIn()">
+        <svg width="18" height="18" viewBox="0 0 18 18">
+          <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+          <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+          <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+          <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+        </svg>
+        Sign in with Google
+      </button>
+      <div class="unauth" id="unauth-msg">Your account is not authorized as a teacher.</div>
     </div>
   </div>
 
@@ -170,43 +102,37 @@
     <div class="topbar">
       <h1>📋 Teacher Portal</h1>
       <div class="topbar-right">
-        <div class="avatar" id="user-avatar" style="display:none">
-          <img id="user-photo" src="" alt="">
-        </div>
+        <div class="avatar" id="user-avatar" style="display:none"><img id="user-photo" src="" alt=""></div>
         <span id="user-name" style="font-size:13px;color:var(--muted)"></span>
         <button class="btn-ghost" style="font-size:12px;padding:5px 10px" onclick="doSignOut()">Sign out</button>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-label">Create a New Class</div>
-      <input type="text" id="i-classname" placeholder="Class name (e.g. Period 3 Math)" maxlength="48" />
+      <div class="label">Create a New Class</div>
+      <input type="text" id="i-cname" placeholder="Class name (e.g. Period 3 Math)" maxlength="48">
       <div style="display:flex;gap:10px;align-items:flex-start">
-        <input type="text" id="i-classcode" placeholder="Class code (e.g. MATH3)" maxlength="10"
-          style="text-transform:uppercase;margin-bottom:0;flex:1" />
+        <input type="text" id="i-ccode" placeholder="Class code (e.g. MATH3)" maxlength="10" style="text-transform:uppercase;margin-bottom:0;flex:1">
         <button class="btn-primary" onclick="createClass()">Create Class</button>
       </div>
       <div class="err" id="e-create"></div>
     </div>
 
-    <div class="card-label" style="padding:0 4px;margin-bottom:12px">My Classes</div>
+    <div class="label" style="padding:0 4px;margin-bottom:12px">My Classes</div>
     <div id="classes-list">
       <div style="text-align:center;padding:32px 0;color:var(--muted);font-size:14px">Loading your classes...</div>
     </div>
   </div>
 
 </div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getDatabase, ref, get, set, push, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-const AUTHORIZED_EMAILS = [
-  "steven.goldburg@gmail.com"
-];
+const ALLOWED = ["steven.goldburg@gmail.com"];
 
-const firebaseConfig = {
+const cfg = {
   apiKey: "AIzaSyAMidsyva-82OJVpPgaJMGIxDoWi75Y58I",
   authDomain: "classqueue-66037.firebaseapp.com",
   databaseURL: "https://classqueue-66037-default-rtdb.firebaseio.com",
@@ -216,16 +142,29 @@ const firebaseConfig = {
   appId: "1:523072247188:web:d61bf93c03b6fbe3dc2b81"
 };
 
-const fbApp  = initializeApp(firebaseConfig);
-const auth   = getAuth(fbApp);
-const db     = getDatabase(fbApp);
-const provider = new GoogleAuthProvider();
+function dbg(msg) {
+  const el = document.getElementById("debug-log");
+  if (el) { el.style.display = "block"; el.textContent += msg + "\n"; }
+  console.log(msg);
+}
 
-let currentUser = null;
-let classUnsubs = {};
+let fbApp, auth, db, provider;
+try {
+  dbg("Initializing Firebase...");
+  fbApp    = initializeApp(cfg);
+  auth     = getAuth(fbApp);
+  db       = getDatabase(fbApp);
+  provider = new GoogleAuthProvider();
+  dbg("Firebase OK");
+} catch(e) {
+  dbg("Firebase init error: " + e.message);
+}
+
+let me = null;
+let unsubs = {};
 
 function go(id) {
-  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".section").forEach(function(s){ s.classList.remove("active"); });
   document.getElementById(id).classList.add("active");
 }
 
@@ -233,38 +172,43 @@ function esc(s) {
   return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-function timeAgo(ts) {
-  const s = Math.floor((Date.now() - ts) / 1000);
+function ago(ts) {
+  var s = Math.floor((Date.now() - ts) / 1000);
   if (s < 60) return s + "s ago";
-  const m = Math.floor(s / 60);
+  var m = Math.floor(s / 60);
   if (m < 60) return m + "m ago";
   return Math.floor(m / 60) + "h ago";
 }
 
-window.signInWithGoogle = async () => {
-  const btn = document.getElementById("signin-btn");
+window.doSignIn = function() {
+  var btn = document.getElementById("signin-btn");
   btn.disabled = true;
-  btn.textContent = "Signing in...";
-  try {
-    await signInWithPopup(auth, provider);
-  } catch(e) {
-    console.error("Sign in error:", e);
+  btn.textContent = "Opening sign-in...";
+  dbg("Starting Google sign-in...");
+  signInWithPopup(auth, provider).then(function(result) {
+    dbg("Sign-in success: " + result.user.email);
+  }).catch(function(e) {
+    dbg("Sign-in error: " + e.code + " - " + e.message);
     btn.disabled = false;
-    btn.innerHTML = "Sign in with Google";
-  }
+    btn.textContent = "Sign in with Google";
+  });
 };
 
-window.doSignOut = () => signOut(auth);
+window.doSignOut = function() { signOut(auth); };
 
-onAuthStateChanged(auth, async user => {
+dbg("Setting up auth listener...");
+onAuthStateChanged(auth, function(user) {
+  dbg("Auth state changed: " + (user ? user.email : "signed out"));
   if (user) {
-    if (!AUTHORIZED_EMAILS.includes(user.email)) {
-      await signOut(auth);
-      document.getElementById("unauth-banner").style.display = "block";
+    if (!ALLOWED.includes(user.email)) {
+      dbg("Email not authorized: " + user.email);
+      signOut(auth);
+      document.getElementById("unauth-msg").style.display = "block";
       go("s-login");
       return;
     }
-    currentUser = user;
+    me = user;
+    dbg("Authorized. Loading portal...");
     document.getElementById("user-name").textContent = user.displayName || user.email;
     if (user.photoURL) {
       document.getElementById("user-photo").src = user.photoURL;
@@ -273,140 +217,154 @@ onAuthStateChanged(auth, async user => {
     go("s-portal");
     loadClasses();
   } else {
-    currentUser = null;
-    Object.values(classUnsubs).forEach(u => u && u());
-    classUnsubs = {};
+    me = null;
+    Object.values(unsubs).forEach(function(u){ if(u) u(); });
+    unsubs = {};
     go("s-login");
   }
 });
 
-async function loadClasses() {
-  const snap = await get(ref(db, "teacherClasses/" + currentUser.uid));
-  const el = document.getElementById("classes-list");
-  if (!snap.exists()) {
-    el.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--muted);font-size:14px">No classes yet. Create one above.</div>';
-    return;
-  }
-  el.innerHTML = "";
-  const classes = Object.entries(snap.val()).map(([k,v]) => ({...v, _key:k}));
-  classes.sort((a,b) => (a.createdAt||0) - (b.createdAt||0));
-  classes.forEach(cls => renderClassCard(cls));
+function loadClasses() {
+  dbg("Loading classes for uid: " + me.uid);
+  get(ref(db, "teacherClasses/" + me.uid)).then(function(snap) {
+    var el = document.getElementById("classes-list");
+    if (!snap.exists()) {
+      dbg("No classes found");
+      el.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--muted);font-size:14px">No classes yet. Create one above.</div>';
+      return;
+    }
+    dbg("Classes loaded");
+    el.innerHTML = "";
+    var list = Object.entries(snap.val()).map(function(e){ return Object.assign({}, e[1], {_key: e[0]}); });
+    list.sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); });
+    list.forEach(function(cls){ addClassCard(cls); });
+  }).catch(function(e){ dbg("loadClasses error: " + e.message); });
 }
 
-function renderClassCard(cls) {
-  const el = document.getElementById("classes-list");
-  const card = document.createElement("div");
-  card.className = "class-card";
-  card.id = "cls-" + cls.code;
-  card.innerHTML =
-    '<div class="class-card-header" onclick="toggleClass(\'' + cls.code + '\')">' +
+function addClassCard(cls) {
+  var el = document.getElementById("classes-list");
+  var d = document.createElement("div");
+  d.className = "class-card";
+  d.id = "cls-" + cls.code;
+  d.innerHTML =
+    '<div class="class-hdr" id="hdr-' + cls.code + '" onclick="toggleCls(\'' + cls.code + '\')">' +
       '<div class="class-info">' +
         '<div class="class-name">' + esc(cls.className) + '</div>' +
-        '<div class="class-meta">Code: <strong style="font-family:\'DM Mono\',monospace;letter-spacing:0.05em">' + esc(cls.code) + '</strong></div>' +
+        '<div class="class-meta">Code: <strong style="font-family:\'DM Mono\',monospace">' + esc(cls.code) + '</strong></div>' +
       '</div>' +
-      '<span class="queue-count-badge zero" id="cls-badge-' + cls.code + '">0 waiting</span>' +
-      '<span class="chevron" id="cls-chev-' + cls.code + '">&#9660;</span>' +
+      '<span class="badge badge-ok" id="badge-' + cls.code + '">0 waiting</span>' +
+      '<span class="chev" id="chev-' + cls.code + '">&#9660;</span>' +
     '</div>' +
-    '<div class="class-body" id="cls-body-' + cls.code + '" style="display:none">' +
-      '<div id="cls-queue-' + cls.code + '"><div style="color:var(--muted);font-size:13px">Loading queue...</div></div>' +
+    '<div class="class-body" id="body-' + cls.code + '" style="display:none">' +
+      '<div id="q-' + cls.code + '"><div style="color:var(--muted);font-size:13px">Loading queue...</div></div>' +
       '<hr class="divider">' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-        '<button class="btn-primary" style="font-size:13px;padding:7px 14px" onclick="clearQueue(\'' + cls.code + '\')">Clear Queue</button>' +
-        '<button class="btn-danger-sm" onclick="deleteClass(\'' + cls.code + '\',\'' + esc(cls.className) + '\')">Delete Class</button>' +
+        '<button class="btn-primary" style="font-size:13px;padding:7px 14px" onclick="clearQ(\'' + cls.code + '\')">Clear Queue</button>' +
+        '<button class="btn-del" onclick="delClass(\'' + cls.code + '\',\'' + esc(cls.className) + '\')">Delete Class</button>' +
       '</div>' +
     '</div>';
-  el.appendChild(card);
-  startQueueListener(cls.code);
+  el.appendChild(d);
+  listenQ(cls.code);
 }
 
-window.toggleClass = (code) => {
-  const body = document.getElementById("cls-body-" + code);
-  const chev = document.getElementById("cls-chev-" + code);
-  const hdr  = document.querySelector("#cls-" + code + " .class-card-header");
-  const open = body.style.display !== "none";
+window.toggleCls = function(code) {
+  var body = document.getElementById("body-" + code);
+  var chev = document.getElementById("chev-" + code);
+  var hdr  = document.getElementById("hdr-" + code);
+  var open = body.style.display !== "none";
   body.style.display = open ? "none" : "block";
   chev.classList.toggle("open", !open);
   hdr.classList.toggle("open", !open);
 };
 
-function startQueueListener(code) {
-  if (classUnsubs[code]) classUnsubs[code]();
-  classUnsubs[code] = onValue(ref(db, "classes/" + code + "/queue"), snap => {
-    const raw = snap.exists() ? snap.val() : {};
-    const q = Object.entries(raw).map(([k,v]) => ({...v, _key:k})).sort((a,b) => a.ts - b.ts);
-    updateClassQueue(code, q);
+function listenQ(code) {
+  if (unsubs[code]) unsubs[code]();
+  unsubs[code] = onValue(ref(db, "classes/" + code + "/queue"), function(snap) {
+    var raw = snap.exists() ? snap.val() : {};
+    var q = Object.entries(raw).map(function(e){ return Object.assign({}, e[1], {_key: e[0]}); });
+    q.sort(function(a,b){ return a.ts - b.ts; });
+    renderQ(code, q);
   });
 }
 
-function updateClassQueue(code, q) {
-  const badge = document.getElementById("cls-badge-" + code);
-  const qEl   = document.getElementById("cls-queue-" + code);
+function renderQ(code, q) {
+  var badge = document.getElementById("badge-" + code);
+  var qEl   = document.getElementById("q-" + code);
   if (!badge || !qEl) return;
   badge.textContent = q.length + " waiting";
-  badge.className = "queue-count-badge" + (q.length === 0 ? " zero" : "");
+  badge.className = "badge " + (q.length === 0 ? "badge-ok" : "badge-warn");
   if (!q.length) {
-    qEl.innerHTML = '<div class="empty" style="padding:16px 0 8px">Queue is empty</div>';
+    qEl.innerHTML = '<div class="empty">Queue is empty</div>';
     return;
   }
-  qEl.innerHTML = q.map((item, i) =>
-    '<div class="queue-row ' + (i === 0 ? "first" : "") + '">' +
+  var html = "";
+  for (var i = 0; i < q.length; i++) {
+    var item = q[i];
+    html += '<div class="q-row ' + (i === 0 ? "first" : "") + '">' +
       '<span class="qr-num">' + (i+1) + '</span>' +
       '<span class="qr-name">' + esc(item.name) + '</span>' +
-      '<span class="qr-time">' + timeAgo(item.ts) + '</span>' +
-      '<button class="done-btn" onclick="removeFromQueue(\'' + code + '\',\'' + item._key + '\')">Done ✓</button>' +
-    '</div>'
-  ).join("");
+      '<span class="qr-time">' + ago(item.ts) + '</span>' +
+      '<button class="btn-done" onclick="doneStudent(\'' + code + '\',\'' + item._key + '\')">Done &#10003;</button>' +
+    '</div>';
+  }
+  qEl.innerHTML = html;
 }
 
-window.removeFromQueue = async (code, key) => {
-  await remove(ref(db, "classes/" + code + "/queue/" + key));
+window.doneStudent = function(code, key) {
+  remove(ref(db, "classes/" + code + "/queue/" + key));
 };
 
-window.clearQueue = async (code) => {
+window.clearQ = function(code) {
   if (!confirm("Clear the entire queue for this class?")) return;
-  await set(ref(db, "classes/" + code + "/queue"), null);
+  set(ref(db, "classes/" + code + "/queue"), null);
 };
 
-window.createClass = async () => {
-  const name = document.getElementById("i-classname").value.trim();
-  const code = document.getElementById("i-classcode").value.trim().toUpperCase();
-  const err  = document.getElementById("e-create");
+window.createClass = function() {
+  var name = document.getElementById("i-cname").value.trim();
+  var code = document.getElementById("i-ccode").value.trim().toUpperCase();
+  var err  = document.getElementById("e-create");
   if (!name) { err.textContent = "Enter a class name."; return; }
   if (!code) { err.textContent = "Enter a class code."; return; }
   if (!/^[A-Z0-9]{2,10}$/.test(code)) { err.textContent = "Code must be 2-10 letters/numbers, no spaces."; return; }
-  const existing = await get(ref(db, "classes/" + code + "/config"));
-  if (existing.exists()) { err.textContent = 'Code "' + code + '" is already in use. Choose another.'; return; }
-  const classData = { className: name, code: code, ownerUid: currentUser.uid, createdAt: Date.now() };
-  await set(ref(db, "classes/" + code + "/config"), classData);
-  await push(ref(db, "teacherClasses/" + currentUser.uid), classData);
-  err.textContent = "";
-  document.getElementById("i-classname").value = "";
-  document.getElementById("i-classcode").value = "";
-  const el = document.getElementById("classes-list");
-  const empty = el.querySelector("div[style]");
-  if (empty) el.innerHTML = "";
-  renderClassCard(classData);
+  get(ref(db, "classes/" + code + "/config")).then(function(snap) {
+    if (snap.exists()) { err.textContent = 'Code "' + code + '" is already in use.'; return; }
+    var data = { className: name, code: code, ownerUid: me.uid, createdAt: Date.now() };
+    set(ref(db, "classes/" + code + "/config"), data).then(function() {
+      push(ref(db, "teacherClasses/" + me.uid), data).then(function() {
+        err.textContent = "";
+        document.getElementById("i-cname").value = "";
+        document.getElementById("i-ccode").value = "";
+        var el = document.getElementById("classes-list");
+        if (el.querySelector("[style*='text-align:center']")) el.innerHTML = "";
+        addClassCard(data);
+        dbg("Class created: " + code);
+      });
+    });
+  }).catch(function(e){ err.textContent = "Error: " + e.message; dbg("createClass error: " + e.message); });
 };
 
-window.deleteClass = async (code, name) => {
+window.delClass = function(code, name) {
   if (!confirm('Delete class "' + name + '" and its entire queue? This cannot be undone.')) return;
-  await set(ref(db, "classes/" + code), null);
-  const snap = await get(ref(db, "teacherClasses/" + currentUser.uid));
-  if (snap.exists()) {
-    for (const [k, v] of Object.entries(snap.val())) {
-      if (v.code === code) {
-        await remove(ref(db, "teacherClasses/" + currentUser.uid + "/" + k));
-        break;
+  set(ref(db, "classes/" + code), null).then(function() {
+    get(ref(db, "teacherClasses/" + me.uid)).then(function(snap) {
+      if (snap.exists()) {
+        var entries = Object.entries(snap.val());
+        for (var i = 0; i < entries.length; i++) {
+          if (entries[i][1].code === code) {
+            remove(ref(db, "teacherClasses/" + me.uid + "/" + entries[i][0]));
+            break;
+          }
+        }
       }
-    }
-  }
-  if (classUnsubs[code]) { classUnsubs[code](); delete classUnsubs[code]; }
-  const card = document.getElementById("cls-" + code);
-  if (card) card.remove();
-  if (!document.getElementById("classes-list").children.length) {
-    document.getElementById("classes-list").innerHTML =
-      '<div style="text-align:center;padding:32px 0;color:var(--muted);font-size:14px">No classes yet. Create one above.</div>';
-  }
+      if (unsubs[code]) { unsubs[code](); delete unsubs[code]; }
+      var card = document.getElementById("cls-" + code);
+      if (card) card.remove();
+      if (!document.getElementById("classes-list").children.length) {
+        document.getElementById("classes-list").innerHTML =
+          '<div style="text-align:center;padding:32px 0;color:var(--muted);font-size:14px">No classes yet. Create one above.</div>';
+      }
+    });
+  });
 };
 </script>
 </body>
