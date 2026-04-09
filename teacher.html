@@ -36,7 +36,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .btn-done{font-size:12px;padding:6px 12px;background:var(--success-light);color:var(--success);border-radius:6px;border:.5px solid rgba(26,122,74,.2);cursor:pointer;font-family:inherit;font-weight:500;flex-shrink:0}
 .btn-done:hover{opacity:.8}
 .btn-del{font-size:12px;padding:5px 10px;background:var(--danger-light);color:var(--danger);border-radius:6px;border:.5px solid rgba(192,57,43,.2);cursor:pointer;font-family:inherit;font-weight:500;flex-shrink:0}
-.btn-del:hover{opacity:.8}
+.btn-open{font-size:12px;padding:5px 12px;background:var(--accent-light);color:var(--accent-text);border-radius:6px;border:.5px solid rgba(45,91,227,.2);cursor:pointer;font-family:inherit;font-weight:500;flex-shrink:0}
+.btn-open:hover{opacity:.8}
 .divider{border:none;border-top:.5px solid var(--border);margin:16px 0}
 .err{font-size:13px;color:var(--danger);margin-top:8px}
 .empty{text-align:center;padding:24px 0 8px;color:var(--muted);font-size:14px}
@@ -67,17 +68,95 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .badge{font-size:11px;font-weight:600;border-radius:99px;padding:2px 8px}
 .badge-warn{background:var(--warn-light);color:var(--warn);border:.5px solid rgba(184,92,0,.2)}
 .badge-ok{background:var(--success-light);color:var(--success);border:.5px solid rgba(26,122,74,.2)}
-.debug{background:#1a1917;color:#a8e6a3;font-family:'DM Mono',monospace;font-size:12px;border-radius:var(--r);padding:12px 14px;margin-top:16px;line-height:1.8;white-space:pre-wrap;word-break:break-all}
+
+/* ── PROJECTED VIEW ── */
+#projected{
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:#0f172a;color:#fff;
+  font-family:'DM Sans',sans-serif;
+  flex-direction:column;
+}
+#projected.visible{display:flex}
+.pv-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:24px 40px 20px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.pv-title{font-size:22px;font-weight:600;opacity:.7;letter-spacing:-.3px}
+.pv-code{
+  font-family:'DM Mono',monospace;font-size:15px;
+  background:rgba(255,255,255,.08);border-radius:8px;
+  padding:6px 14px;letter-spacing:.12em;opacity:.8
+}
+.pv-close{
+  background:rgba(255,255,255,.1);border:none;color:#fff;
+  border-radius:8px;padding:8px 16px;font-family:inherit;
+  font-size:13px;cursor:pointer;opacity:.7;
+}
+.pv-close:hover{opacity:1;background:rgba(255,255,255,.15)}
+.pv-body{flex:1;display:flex;flex-direction:column;padding:32px 40px;overflow:hidden}
+.pv-empty{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;opacity:.35;
+}
+.pv-empty-icon{font-size:72px;margin-bottom:20px}
+.pv-empty-text{font-size:26px;font-weight:500}
+
+/* Next up hero */
+.pv-next{
+  background:linear-gradient(135deg,#1e3a8a 0%,#2D5BE3 100%);
+  border-radius:20px;padding:32px 40px;margin-bottom:28px;
+  display:flex;align-items:center;gap:28px;
+  border:1px solid rgba(255,255,255,.15);
+  flex-shrink:0;
+}
+.pv-next-label{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;opacity:.7;margin-bottom:6px}
+.pv-next-name{font-size:52px;font-weight:600;letter-spacing:-.5px;line-height:1}
+.pv-next-icon{font-size:64px;flex-shrink:0}
+.pv-next-wait{font-size:14px;opacity:.6;margin-top:8px}
+
+/* Queue list */
+.pv-queue-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;opacity:.4;margin-bottom:16px}
+.pv-queue{display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex:1}
+.pv-item{
+  display:flex;align-items:center;gap:20px;
+  background:rgba(255,255,255,.06);border-radius:14px;
+  padding:16px 24px;border:1px solid rgba(255,255,255,.07);
+  transition:background .2s;
+}
+.pv-item:hover{background:rgba(255,255,255,.09)}
+.pv-item-num{
+  font-family:'DM Mono',monospace;font-size:16px;
+  opacity:.35;min-width:32px;font-weight:500
+}
+.pv-item-name{flex:1;font-size:24px;font-weight:500}
+.pv-item-time{font-size:13px;opacity:.4;font-family:'DM Mono',monospace}
+.pv-item-done{
+  background:rgba(26,122,74,.25);color:#6ee7b7;
+  border:1px solid rgba(110,231,183,.2);border-radius:8px;
+  padding:6px 14px;font-size:13px;font-weight:500;
+  cursor:pointer;font-family:inherit;flex-shrink:0;
+  transition:background .15s;
+}
+.pv-item-done:hover{background:rgba(26,122,74,.4)}
+
+/* count badge */
+.pv-count{
+  font-size:15px;font-weight:600;
+  background:rgba(255,255,255,.08);border-radius:99px;
+  padding:4px 14px;opacity:.7;margin-left:auto;
+}
+
+/* pulse animation for next-up */
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(45,91,227,.4)}50%{box-shadow:0 0 0 12px rgba(45,91,227,0)}}
+.pv-next{animation:pulse 2.5s ease infinite}
 </style>
 </head>
 <body>
 <div id="app">
 
   <div id="s-loading" class="section active">
-    <div style="text-align:center;padding:80px 0;color:var(--muted);font-size:14px">
-      Loading...
-      <div id="debug-log" class="debug" style="margin-top:24px;text-align:left;display:none"></div>
-    </div>
+    <div style="text-align:center;padding:80px 0;color:var(--muted);font-size:14px">Loading...</div>
   </div>
 
   <div id="s-login" class="section">
@@ -125,6 +204,38 @@ button:disabled{opacity:.45;cursor:not-allowed}
   </div>
 
 </div>
+
+<!-- PROJECTED VIEW OVERLAY -->
+<div id="projected">
+  <div class="pv-header">
+    <div class="pv-title" id="pv-title">Class Queue</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="font-size:13px;opacity:.5">Join with code:</div>
+      <div class="pv-code" id="pv-code"></div>
+      <div class="pv-count" id="pv-count">0 waiting</div>
+      <button class="pv-close" onclick="closeProjected()">&#10005; Close</button>
+    </div>
+  </div>
+  <div class="pv-body" id="pv-body">
+    <div class="pv-empty" id="pv-empty">
+      <div class="pv-empty-icon">✅</div>
+      <div class="pv-empty-text">Queue is empty — all caught up!</div>
+    </div>
+    <div id="pv-next" class="pv-next" style="display:none">
+      <div class="pv-next-icon">👋</div>
+      <div>
+        <div class="pv-next-label">Next up</div>
+        <div class="pv-next-name" id="pv-next-name"></div>
+        <div class="pv-next-wait" id="pv-next-wait"></div>
+      </div>
+    </div>
+    <div id="pv-rest" style="display:none">
+      <div class="pv-queue-label">Also waiting</div>
+      <div class="pv-queue" id="pv-queue-list"></div>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -142,26 +253,15 @@ const cfg = {
   appId: "1:523072247188:web:d61bf93c03b6fbe3dc2b81"
 };
 
-function dbg(msg) {
-  const el = document.getElementById("debug-log");
-  if (el) { el.style.display = "block"; el.textContent += msg + "\n"; }
-  console.log(msg);
-}
+var fbApp  = initializeApp(cfg);
+var auth   = getAuth(fbApp);
+var db     = getDatabase(fbApp);
+var prov   = new GoogleAuthProvider();
 
-let fbApp, auth, db, provider;
-try {
-  dbg("Initializing Firebase...");
-  fbApp    = initializeApp(cfg);
-  auth     = getAuth(fbApp);
-  db       = getDatabase(fbApp);
-  provider = new GoogleAuthProvider();
-  dbg("Firebase OK");
-} catch(e) {
-  dbg("Firebase init error: " + e.message);
-}
-
-let me = null;
-let unsubs = {};
+var me = null;
+var unsubs = {};
+var pvUnsub = null;
+var pvCode  = null;
 
 function go(id) {
   document.querySelectorAll(".section").forEach(function(s){ s.classList.remove("active"); });
@@ -174,41 +274,39 @@ function esc(s) {
 
 function ago(ts) {
   var s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return "waiting " + s + "s";
+  var m = Math.floor(s / 60);
+  if (m < 60) return "waiting " + m + "m";
+  return "waiting " + Math.floor(m/60) + "h";
+}
+
+function agoShort(ts) {
+  var s = Math.floor((Date.now() - ts) / 1000);
   if (s < 60) return s + "s ago";
   var m = Math.floor(s / 60);
   if (m < 60) return m + "m ago";
-  return Math.floor(m / 60) + "h ago";
+  return Math.floor(m/60) + "h ago";
 }
 
 window.doSignIn = function() {
   var btn = document.getElementById("signin-btn");
-  btn.disabled = true;
-  btn.textContent = "Opening sign-in...";
-  dbg("Starting Google sign-in...");
-  signInWithPopup(auth, provider).then(function(result) {
-    dbg("Sign-in success: " + result.user.email);
-  }).catch(function(e) {
-    dbg("Sign-in error: " + e.code + " - " + e.message);
-    btn.disabled = false;
-    btn.textContent = "Sign in with Google";
+  btn.disabled = true; btn.textContent = "Opening sign-in...";
+  signInWithPopup(auth, prov).catch(function(e) {
+    console.error(e);
+    btn.disabled = false; btn.textContent = "Sign in with Google";
   });
 };
 
 window.doSignOut = function() { signOut(auth); };
 
-dbg("Setting up auth listener...");
 onAuthStateChanged(auth, function(user) {
-  dbg("Auth state changed: " + (user ? user.email : "signed out"));
   if (user) {
     if (!ALLOWED.includes(user.email)) {
-      dbg("Email not authorized: " + user.email);
       signOut(auth);
       document.getElementById("unauth-msg").style.display = "block";
-      go("s-login");
-      return;
+      go("s-login"); return;
     }
     me = user;
-    dbg("Authorized. Loading portal...");
     document.getElementById("user-name").textContent = user.displayName || user.email;
     if (user.photoURL) {
       document.getElementById("user-photo").src = user.photoURL;
@@ -220,25 +318,23 @@ onAuthStateChanged(auth, function(user) {
     me = null;
     Object.values(unsubs).forEach(function(u){ if(u) u(); });
     unsubs = {};
+    closeProjected();
     go("s-login");
   }
 });
 
 function loadClasses() {
-  dbg("Loading classes for uid: " + me.uid);
   get(ref(db, "teacherClasses/" + me.uid)).then(function(snap) {
     var el = document.getElementById("classes-list");
     if (!snap.exists()) {
-      dbg("No classes found");
       el.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--muted);font-size:14px">No classes yet. Create one above.</div>';
       return;
     }
-    dbg("Classes loaded");
     el.innerHTML = "";
     var list = Object.entries(snap.val()).map(function(e){ return Object.assign({}, e[1], {_key: e[0]}); });
     list.sort(function(a,b){ return (a.createdAt||0)-(b.createdAt||0); });
     list.forEach(function(cls){ addClassCard(cls); });
-  }).catch(function(e){ dbg("loadClasses error: " + e.message); });
+  });
 }
 
 function addClassCard(cls) {
@@ -258,7 +354,8 @@ function addClassCard(cls) {
     '<div class="class-body" id="body-' + cls.code + '" style="display:none">' +
       '<div id="q-' + cls.code + '"><div style="color:var(--muted);font-size:13px">Loading queue...</div></div>' +
       '<hr class="divider">' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
+        '<button class="btn-open" onclick="openProjected(\'' + cls.code + '\',\'' + esc(cls.className) + '\')">&#9654; Open Display</button>' +
         '<button class="btn-primary" style="font-size:13px;padding:7px 14px" onclick="clearQ(\'' + cls.code + '\')">Clear Queue</button>' +
         '<button class="btn-del" onclick="delClass(\'' + cls.code + '\',\'' + esc(cls.className) + '\')">Delete Class</button>' +
       '</div>' +
@@ -284,6 +381,7 @@ function listenQ(code) {
     var q = Object.entries(raw).map(function(e){ return Object.assign({}, e[1], {_key: e[0]}); });
     q.sort(function(a,b){ return a.ts - b.ts; });
     renderQ(code, q);
+    if (pvCode === code) renderProjected(q);
   });
 }
 
@@ -300,12 +398,13 @@ function renderQ(code, q) {
   var html = "";
   for (var i = 0; i < q.length; i++) {
     var item = q[i];
-    html += '<div class="q-row ' + (i === 0 ? "first" : "") + '">' +
-      '<span class="qr-num">' + (i+1) + '</span>' +
-      '<span class="qr-name">' + esc(item.name) + '</span>' +
-      '<span class="qr-time">' + ago(item.ts) + '</span>' +
-      '<button class="btn-done" onclick="doneStudent(\'' + code + '\',\'' + item._key + '\')">Done &#10003;</button>' +
-    '</div>';
+    html +=
+      '<div class="q-row ' + (i===0?"first":"") + '">' +
+        '<span class="qr-num">' + (i+1) + '</span>' +
+        '<span class="qr-name">' + esc(item.name) + '</span>' +
+        '<span class="qr-time">' + agoShort(item.ts) + '</span>' +
+        '<button class="btn-done" onclick="doneStudent(\'' + code + '\',\'' + item._key + '\')">Done &#10003;</button>' +
+      '</div>';
   }
   qEl.innerHTML = html;
 }
@@ -319,6 +418,71 @@ window.clearQ = function(code) {
   set(ref(db, "classes/" + code + "/queue"), null);
 };
 
+// ── Projected view ──
+window.openProjected = function(code, name) {
+  pvCode = code;
+  document.getElementById("pv-title").textContent = name;
+  document.getElementById("pv-code").textContent = code;
+  document.getElementById("projected").classList.add("visible");
+  document.body.style.overflow = "hidden";
+
+  // Get current queue state from already-running listener
+  get(ref(db, "classes/" + code + "/queue")).then(function(snap) {
+    var raw = snap.exists() ? snap.val() : {};
+    var q = Object.entries(raw).map(function(e){ return Object.assign({}, e[1], {_key: e[0]}); });
+    q.sort(function(a,b){ return a.ts - b.ts; });
+    renderProjected(q);
+  });
+};
+
+window.closeProjected = function() {
+  pvCode = null;
+  document.getElementById("projected").classList.remove("visible");
+  document.body.style.overflow = "";
+};
+
+function renderProjected(q) {
+  var countEl   = document.getElementById("pv-count");
+  var emptyEl   = document.getElementById("pv-empty");
+  var nextEl    = document.getElementById("pv-next");
+  var restEl    = document.getElementById("pv-rest");
+  var nextName  = document.getElementById("pv-next-name");
+  var nextWait  = document.getElementById("pv-next-wait");
+  var listEl    = document.getElementById("pv-queue-list");
+
+  countEl.textContent = q.length + " waiting";
+
+  if (!q.length) {
+    emptyEl.style.display = "flex";
+    nextEl.style.display  = "none";
+    restEl.style.display  = "none";
+    return;
+  }
+
+  emptyEl.style.display = "none";
+  nextEl.style.display  = "flex";
+  nextName.textContent  = q[0].name;
+  nextWait.textContent  = ago(q[0].ts);
+
+  if (q.length > 1) {
+    restEl.style.display = "block";
+    var html = "";
+    for (var i = 1; i < q.length; i++) {
+      var item = q[i];
+      html +=
+        '<div class="pv-item">' +
+          '<span class="pv-item-num">' + (i+1) + '</span>' +
+          '<span class="pv-item-name">' + esc(item.name) + '</span>' +
+          '<span class="pv-item-time">' + ago(item.ts) + '</span>' +
+          '<button class="pv-item-done" onclick="doneStudent(\'' + pvCode + '\',\'' + item._key + '\')">Done &#10003;</button>' +
+        '</div>';
+    }
+    listEl.innerHTML = html;
+  } else {
+    restEl.style.display = "none";
+  }
+}
+
 window.createClass = function() {
   var name = document.getElementById("i-cname").value.trim();
   var code = document.getElementById("i-ccode").value.trim().toUpperCase();
@@ -327,7 +491,7 @@ window.createClass = function() {
   if (!code) { err.textContent = "Enter a class code."; return; }
   if (!/^[A-Z0-9]{2,10}$/.test(code)) { err.textContent = "Code must be 2-10 letters/numbers, no spaces."; return; }
   get(ref(db, "classes/" + code + "/config")).then(function(snap) {
-    if (snap.exists()) { err.textContent = 'Code "' + code + '" is already in use.'; return; }
+    if (snap.exists()) { err.textContent = 'Code "' + code + '" is already in use. Choose another.'; return; }
     var data = { className: name, code: code, ownerUid: me.uid, createdAt: Date.now() };
     set(ref(db, "classes/" + code + "/config"), data).then(function() {
       push(ref(db, "teacherClasses/" + me.uid), data).then(function() {
@@ -335,16 +499,16 @@ window.createClass = function() {
         document.getElementById("i-cname").value = "";
         document.getElementById("i-ccode").value = "";
         var el = document.getElementById("classes-list");
-        if (el.querySelector("[style*='text-align:center']")) el.innerHTML = "";
+        if (el.querySelector("[style*='padding:32px']")) el.innerHTML = "";
         addClassCard(data);
-        dbg("Class created: " + code);
       });
     });
-  }).catch(function(e){ err.textContent = "Error: " + e.message; dbg("createClass error: " + e.message); });
+  }).catch(function(e){ err.textContent = "Error: " + e.message; });
 };
 
 window.delClass = function(code, name) {
   if (!confirm('Delete class "' + name + '" and its entire queue? This cannot be undone.')) return;
+  if (pvCode === code) closeProjected();
   set(ref(db, "classes/" + code), null).then(function() {
     get(ref(db, "teacherClasses/" + me.uid)).then(function(snap) {
       if (snap.exists()) {
