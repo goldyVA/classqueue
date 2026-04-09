@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Console</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F7F5F0;--surface:#fff;--border:rgba(0,0,0,.10);--border-strong:rgba(0,0,0,.18);
+  --text:#1A1917;--muted:#6B6860;
+  --accent:#2D5BE3;--accent-light:#EEF2FD;--accent-text:#1A3BB0;
+  --danger:#C0392B;--danger-light:#FEF0EE;
+  --success:#1A7A4A;--success-light:#EDFAF3;
+  --r:10px;--rl:16px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04)
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px 48px}
+#app{width:100%;max-width:520px}
+.section{display:none}.section.active{display:block}
+.card{background:var(--surface);border-radius:var(--rl);border:.5px solid var(--border-strong);padding:24px;box-shadow:var(--shadow);margin-bottom:16px}
+.lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px}
+input[type=text],input[type=email]{width:100%;padding:10px 14px;border:.5px solid var(--border-strong);border-radius:var(--r);font-family:inherit;font-size:15px;color:var(--text);background:var(--bg);outline:none;transition:border-color .15s;margin-bottom:12px}
+input:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(45,91,227,.12)}
+button{font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;border-radius:var(--r);padding:10px 18px;border:none;transition:opacity .15s,transform .1s}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover:not(:disabled){opacity:.88}
+.btn-ghost{background:transparent;color:var(--muted);border:.5px solid var(--border-strong)}
+.btn-ghost:hover{background:var(--bg)}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:var(--text);border:.5px solid var(--border-strong);width:100%;padding:11px 18px;font-size:15px;box-shadow:var(--shadow);border-radius:var(--r)}
+.btn-google:hover{background:var(--bg)}
+.divider{border:none;border-top:.5px solid var(--border);margin:16px 0}
+.err{font-size:13px;color:var(--danger);margin-top:8px}
+.ok{font-size:13px;color:var(--success);margin-top:8px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.topbar h1{font-size:20px;font-weight:600;letter-spacing:-.3px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.avatar{width:32px;height:32px;border-radius:50%;overflow:hidden;border:.5px solid var(--border-strong)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.login-center{text-align:center;padding:48px 0 24px;max-width:400px;margin:0 auto}
+.login-center h2{font-size:20px;font-weight:600;margin-bottom:8px}
+.login-center p{font-size:14px;color:var(--muted);margin-bottom:28px}
+.unauth{background:var(--danger-light);border:.5px solid rgba(192,57,43,.2);border-radius:var(--r);padding:12px 16px;font-size:13px;color:var(--danger);margin-top:16px;display:none}
+.teacher-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg);border-radius:var(--r);border:.5px solid var(--border);margin-bottom:8px}
+.teacher-email{flex:1;font-size:14px;font-family:'DM Mono',monospace}
+.teacher-added{font-size:11px;color:var(--muted)}
+.btn-remove{font-size:12px;padding:5px 10px;background:var(--danger-light);color:var(--danger);border-radius:6px;border:.5px solid rgba(192,57,43,.2);cursor:pointer;font-family:inherit;font-weight:500;flex-shrink:0}
+.btn-remove:hover{opacity:.8}
+.empty{text-align:center;padding:24px 0 8px;color:var(--muted);font-size:14px}
+.admin-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;background:var(--accent-light);color:var(--accent-text);border:.5px solid rgba(45,91,227,.2)}
+.info-note{background:var(--accent-light);border:.5px solid rgba(45,91,227,.2);border-radius:var(--r);padding:12px 14px;font-size:13px;color:var(--accent-text);margin-bottom:16px;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="s-loading" class="section active">
+    <div style="text-align:center;padding:80px 0;color:var(--muted);font-size:14px">Loading...</div>
+  </div>
+
+  <div id="s-login" class="section">
+    <div class="login-center">
+      <div style="font-size:40px;margin-bottom:16px">🔐</div>
+      <h2>Admin Console</h2>
+      <p>Sign in with your admin Google account to manage authorized teachers.</p>
+      <button class="btn-google" id="signin-btn" onclick="doSignIn()">
+        <svg width="18" height="18" viewBox="0 0 18 18">
+          <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+          <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+          <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+          <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+        </svg>
+        Sign in with Google
+      </button>
+      <div class="unauth" id="unauth-msg">This account does not have admin access.</div>
+    </div>
+  </div>
+
+  <div id="s-admin" class="section">
+    <div class="topbar">
+      <h1>🔐 Admin Console</h1>
+      <div class="topbar-right">
+        <div class="avatar" id="user-avatar" style="display:none"><img id="user-photo" src="" alt=""></div>
+        <span id="user-name" style="font-size:13px;color:var(--muted)"></span>
+        <button class="btn-ghost" style="font-size:12px;padding:5px 10px" onclick="doSignOut()">Sign out</button>
+      </div>
+    </div>
+
+    <div class="info-note">
+      Authorized teachers can sign in to the Teacher Portal. Add their Google email addresses below. The list is stored securely in Firebase — it is never visible in the page source.
+    </div>
+
+    <div class="card">
+      <div class="lbl">Add Authorized Teacher</div>
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <input type="email" id="i-email" placeholder="teacher@school.edu" style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter')addTeacher()">
+        <button class="btn-primary" onclick="addTeacher()">Add</button>
+      </div>
+      <div class="err" id="e-add" style="display:none"></div>
+      <div class="ok"  id="ok-add" style="display:none"></div>
+    </div>
+
+    <div class="lbl" style="padding:0 4px;margin-bottom:12px">Authorized Teachers</div>
+    <div class="card" style="padding:16px">
+      <div id="teacher-list"><div class="empty">Loading...</div></div>
+    </div>
+
+    <div style="margin-top:8px;text-align:right">
+      <a href="teacher.html" style="font-size:13px;color:var(--muted);text-decoration:none">Go to Teacher Portal →</a>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getDatabase, ref, get, push, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const cfg = {
+  apiKey: "AIzaSyAMidsyva-82OJVpPgaJMGIxDoWi75Y58I",
+  authDomain: "classqueue-66037.firebaseapp.com",
+  databaseURL: "https://classqueue-66037-default-rtdb.firebaseio.com",
+  projectId: "classqueue-66037",
+  storageBucket: "classqueue-66037.firebasestorage.app",
+  messagingSenderId: "523072247188",
+  appId: "1:523072247218:web:d61bf93c03b6fbe3dc2b81"
+};
+
+var fbApp = initializeApp(cfg);
+var auth  = getAuth(fbApp);
+var db    = getDatabase(fbApp);
+var prov  = new GoogleAuthProvider();
+var me    = null;
+var listUnsub = null;
+
+function go(id){
+  document.querySelectorAll(".section").forEach(function(s){ s.classList.remove("active"); });
+  document.getElementById(id).classList.add("active");
+}
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function fmtDate(ts){
+  return new Date(ts).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+}
+
+window.doSignIn = function(){
+  var btn=document.getElementById("signin-btn");
+  btn.disabled=true; btn.textContent="Opening sign-in...";
+  signInWithPopup(auth,prov).catch(function(e){
+    console.error(e); btn.disabled=false; btn.textContent="Sign in with Google";
+  });
+};
+window.doSignOut = function(){ signOut(auth); };
+
+onAuthStateChanged(auth, function(user){
+  if (user) {
+    // Only admins can access this page
+    get(ref(db,"adminConfig/admins/"+user.uid)).then(function(snap){
+      if (!snap.exists()) {
+        signOut(auth);
+        document.getElementById("unauth-msg").style.display="block";
+        go("s-login"); return;
+      }
+      me=user;
+      document.getElementById("user-name").textContent=user.displayName||user.email;
+      if (user.photoURL) {
+        document.getElementById("user-photo").src=user.photoURL;
+        document.getElementById("user-avatar").style.display="block";
+      }
+      go("s-admin");
+      listenTeachers();
+    }).catch(function(e){
+      console.error(e); signOut(auth); go("s-login");
+    });
+  } else {
+    me=null;
+    if (listUnsub) { listUnsub(); listUnsub=null; }
+    go("s-login");
+  }
+});
+
+function listenTeachers(){
+  if (listUnsub) listUnsub();
+  listUnsub = onValue(ref(db,"adminConfig/authorizedEmails"), function(snap){
+    var el=document.getElementById("teacher-list");
+    if (!snap.exists()) {
+      el.innerHTML='<div class="empty">No authorized teachers yet. Add one above.</div>';
+      return;
+    }
+    var entries=Object.entries(snap.val()).map(function(e){ return Object.assign({},e[1],{_key:e[0]}); });
+    entries.sort(function(a,b){ return (a.addedAt||0)-(b.addedAt||0); });
+    el.innerHTML=entries.map(function(t){
+      return '<div class="teacher-row">' +
+        '<div>' +
+          '<div class="teacher-email">'+esc(t.email)+'</div>' +
+          (t.addedAt?'<div class="teacher-added">Added '+fmtDate(t.addedAt)+'</div>':'') +
+        '</div>' +
+        '<button class="btn-remove" onclick="removeTeacher(\''+t._key+'\',\''+esc(t.email)+'\')">Remove</button>' +
+      '</div>';
+    }).join("");
+  });
+}
+
+window.addTeacher = function(){
+  var email=document.getElementById("i-email").value.trim().toLowerCase();
+  var errEl=document.getElementById("e-add");
+  var okEl=document.getElementById("ok-add");
+  errEl.style.display="none"; okEl.style.display="none";
+  if (!email) { errEl.textContent="Enter an email address."; errEl.style.display="block"; return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errEl.textContent="Enter a valid email address."; errEl.style.display="block"; return; }
+
+  // Check for duplicates
+  get(ref(db,"adminConfig/authorizedEmails")).then(function(snap){
+    if (snap.exists()) {
+      var vals=Object.values(snap.val());
+      for (var i=0;i<vals.length;i++) {
+        if (vals[i].email===email) {
+          errEl.textContent=email+" is already authorized.";
+          errEl.style.display="block"; return;
+        }
+      }
+    }
+    push(ref(db,"adminConfig/authorizedEmails"),{ email:email, addedAt:Date.now() }).then(function(){
+      document.getElementById("i-email").value="";
+      okEl.textContent=email+" has been added.";
+      okEl.style.display="block";
+      setTimeout(function(){ okEl.style.display="none"; }, 3000);
+    }).catch(function(e){ errEl.textContent="Error: "+e.message; errEl.style.display="block"; });
+  });
+};
+
+window.removeTeacher = function(key, email){
+  if (!confirm("Remove "+email+" as an authorized teacher?")) return;
+  remove(ref(db,"adminConfig/authorizedEmails/"+key));
+};
+</script>
+</body>
+</html>
