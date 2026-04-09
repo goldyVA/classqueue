@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Class Help Queue — Student</title>
+<title>Help Queue — Student</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✋</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -56,14 +57,14 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .header{text-align:center;margin-bottom:28px}
 .header h1{font-size:26px;font-weight:600;letter-spacing:-.5px;margin-bottom:4px}
 .header p{font-size:14px;color:var(--muted)}
-.back-link{text-align:center;margin-top:4px}
-.back-link a{font-size:13px;color:var(--muted);text-decoration:none}
-.back-link a:hover{color:var(--accent)}
+.nav-links{text-align:center;margin-top:4px}
+.nav-links a{font-size:13px;color:var(--muted);text-decoration:none}
+.nav-links a:hover{color:var(--accent)}
 </style>
 </head>
 <body>
 <div class="header">
-  <h1>📋 Class Help Queue</h1>
+  <h1>✋ Help Queue</h1>
   <p>Raise your hand — digitally.</p>
 </div>
 <div id="app">
@@ -75,9 +76,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <div class="err" id="e-code"></div>
       <button class="btn-primary" onclick="checkCode()">Next</button>
     </div>
-    <div class="back-link"><a href="index.html">← Back to home</a></div>
+    <div class="nav-links"><a href="index.html">← Back to home</a></div>
   </div>
-
   <div id="s-name" class="section">
     <div class="card">
       <div class="lbl">Almost there</div>
@@ -89,7 +89,6 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <button class="btn-ghost" onclick="go('s-code')">← Back</button>
     </div>
   </div>
-
   <div id="s-main" class="section">
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
@@ -214,7 +213,7 @@ function renderStudent(q){
       (i===0?'<span class="badge badge-next">Next</span>':'')+
       (isYou&&i>0?'<span class="badge badge-you">You</span>':'')+
       '<span class="q-time" data-ts="'+item.ts+'">'+agoShort(item.ts)+'</span>'+
-      '</div>';
+    '</div>';
   }).join("");
 }
 </script>
