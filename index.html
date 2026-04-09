@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Class Help Queue</title>
+<title>Help Queue</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✋</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -19,29 +20,20 @@
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 16px}
 .wrap{width:100%;max-width:480px}
 .hero{text-align:center;margin-bottom:48px}
-.hero-icon{font-size:56px;margin-bottom:20px;display:block}
-.hero h1{font-size:36px;font-weight:700;letter-spacing:-.8px;color:var(--text);margin-bottom:10px;line-height:1.1}
+.hero-icon{font-size:64px;margin-bottom:20px;display:block}
+.hero h1{font-size:38px;font-weight:700;letter-spacing:-.8px;color:var(--text);margin-bottom:10px;line-height:1.1}
 .hero p{font-size:16px;color:var(--muted);line-height:1.6;max-width:340px;margin:0 auto}
 .choices{display:flex;flex-direction:column;gap:14px}
-.choice-btn{
-  display:flex;align-items:center;gap:20px;
-  background:var(--surface);border-radius:var(--rl);
-  border:.5px solid var(--border-strong);padding:24px 28px;
-  box-shadow:var(--shadow);cursor:pointer;
-  transition:box-shadow .2s,transform .15s,border-color .2s;
-  text-decoration:none;color:var(--text);
-  width:100%;text-align:left;font-family:inherit;
-}
+.choice-btn{display:flex;align-items:center;gap:20px;background:var(--surface);border-radius:var(--rl);border:.5px solid var(--border-strong);padding:24px 28px;box-shadow:var(--shadow);cursor:pointer;transition:box-shadow .2s,transform .15s,border-color .2s;text-decoration:none;color:var(--text);width:100%;text-align:left;font-family:inherit}
 .choice-btn:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);border-color:rgba(0,0,0,.28)}
 .choice-btn:active{transform:translateY(0);box-shadow:var(--shadow)}
-.choice-icon{font-size:36px;flex-shrink:0;width:52px;text-align:center}
-.choice-text{}
+.choice-icon-wrap{border-radius:14px;width:56px;height:56px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.choice-btn.student .choice-icon-wrap{background:var(--accent-light)}
+.choice-btn.teacher .choice-icon-wrap{background:var(--success-light)}
 .choice-title{font-size:18px;font-weight:600;letter-spacing:-.2px;margin-bottom:4px}
 .choice-sub{font-size:13px;color:var(--muted)}
-.choice-arrow{margin-left:auto;font-size:20px;color:var(--muted);flex-shrink:0}
-.choice-btn.student .choice-icon-wrap{background:var(--accent-light);border-radius:12px;width:52px;height:52px;display:flex;align-items:center;justify-content:center}
-.choice-btn.teacher .choice-icon-wrap{background:var(--success-light);border-radius:12px;width:52px;height:52px;display:flex;align-items:center;justify-content:center}
-.footer{text-align:center;margin-top:32px;font-size:12px;color:var(--muted)}
+.choice-arrow{margin-left:auto;font-size:22px;color:var(--muted);flex-shrink:0}
+.footer{text-align:center;margin-top:28px;font-size:12px}
 .footer a{color:var(--muted);text-decoration:none}
 .footer a:hover{color:var(--accent)}
 </style>
@@ -49,31 +41,29 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 <body>
 <div class="wrap">
   <div class="hero">
-    <span class="hero-icon">📋</span>
-    <h1>Class Help Queue</h1>
+    <span class="hero-icon">✋</span>
+    <h1>Help Queue</h1>
     <p>A simple way to manage who needs help next — no more crowds at the teacher's desk.</p>
   </div>
   <div class="choices">
     <a href="student.html" class="choice-btn student">
-      <div class="choice-icon-wrap"><span class="choice-icon">🙋</span></div>
-      <div class="choice-text">
+      <div class="choice-icon-wrap">🙋</div>
+      <div>
         <div class="choice-title">I'm a Student</div>
         <div class="choice-sub">Join the queue when you need help</div>
       </div>
       <span class="choice-arrow">›</span>
     </a>
     <a href="teacher.html" class="choice-btn teacher">
-      <div class="choice-icon-wrap"><span class="choice-icon">👩‍🏫</span></div>
-      <div class="choice-text">
+      <div class="choice-icon-wrap">👩‍🏫</div>
+      <div>
         <div class="choice-title">I'm a Teacher</div>
         <div class="choice-sub">Sign in to manage your class queue</div>
       </div>
       <span class="choice-arrow">›</span>
     </a>
   </div>
-  <div class="footer">
-    <a href="admin.html">Admin console</a>
-  </div>
+  <div class="footer"><a href="admin.html">Admin console</a></div>
 </div>
 </body>
 </html>
