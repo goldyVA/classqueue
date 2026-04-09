@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Portal — Class Help Queue</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F5F0; --surface: #FFFFFF; --border: rgba(0,0,0,0.10);
+    --border-strong: rgba(0,0,0,0.18); --text: #1A1917; --muted: #6B6860;
+    --accent: #2D5BE3; --accent-light: #EEF2FD; --accent-text: #1A3BB0;
+    --danger: #C0392B; --danger-light: #FEF0EE;
+    --success: #1A7A4A; --success-light: #EDFAF3;
+    --warn: #B85C00; --warn-light: #FEF7EE;
+    --radius: 10px; --radius-lg: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+  }
+  body {
+    font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text);
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 24px 16px 48px;
+  }
+  .topbar {
+    width: 100%; max-width: 560px; display: flex; align-items: center;
+    justify-content: space-between; margin-bottom: 28px;
+  }
+  .topbar h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%; overflow: hidden;
+    border: 0.5px solid var(--border-strong);
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .card {
+    background: var(--surface); border-radius: var(--radius-lg);
+    border: 0.5px solid var(--border-strong); padding: 24px;
+    box-shadow: var(--shadow); width: 100%; max-width: 560px; margin-bottom: 16px;
+  }
+  .card-label {
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px;
+  }
+  input[type="text"] {
+    width: 100%; padding: 10px 14px; border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius); font-family: inherit; font-size: 15px;
+    color: var(--text); background: var(--bg); outline: none;
+    transition: border-color 0.15s; margin-bottom: 12px;
+  }
+  input:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px rgba(45,91,227,0.12); }
+  button {
+    font-family: inherit; font-size: 14px; font-weight: 500;
+    cursor: pointer; border-radius: var(--radius); padding: 10px 18px;
+    border: none; transition: opacity 0.15s, transform 0.1s;
+  }
+  button:active { transform: scale(0.97); }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover:not(:disabled) { opacity: 0.88; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 0.5px solid var(--border-strong); }
+  .btn-ghost:hover { background: var(--bg); }
+  .btn-google {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: #fff; color: var(--text); border: 0.5px solid var(--border-strong);
+    width: 100%; padding: 11px 18px; font-size: 15px;
+    box-shadow: var(--shadow);
+  }
+  .btn-google:hover { background: var(--bg); }
+  .btn-danger-sm {
+    font-size: 12px; padding: 5px 10px; background: var(--danger-light); color: var(--danger);
+    border-radius: 6px; border: 0.5px solid rgba(192,57,43,0.2); cursor: pointer;
+    font-family: inherit; font-weight: 500; flex-shrink: 0;
+  }
+  .btn-danger-sm:hover { opacity: 0.8; }
+  .done-btn {
+    font-size: 12px; padding: 6px 12px; background: var(--success-light); color: var(--success);
+    border-radius: 6px; border: 0.5px solid rgba(26,122,74,0.2); cursor: pointer;
+    font-family: inherit; font-weight: 500; flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .done-btn:hover { opacity: 0.8; }
+  .divider { border: none; border-top: 0.5px solid var(--border); margin: 16px 0; }
+  .meta-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .link-btn { background: none; border: none; color: var(--accent); font-family: inherit; font-size: 12px; cursor: pointer; padding: 0; text-decoration: underline; }
+  .code-box {
+    font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500;
+    letter-spacing: 0.15em; color: var(--accent); background: var(--accent-light);
+    border-radius: var(--radius); padding: 8px 14px; text-align: center;
+    border: 0.5px solid rgba(45,91,227,0.2); display: inline-block;
+  }
+  .status-bar {
+    display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+    border-radius: var(--radius); font-size: 13px; font-weight: 500; margin-bottom: 16px;
+  }
+  .s-next { background: var(--accent-light); color: var(--accent-text); border: 0.5px solid rgba(45,91,227,0.2); }
+  .empty { text-align: center; padding: 28px 0 12px; color: var(--muted); font-size: 14px; }
+  .err { font-size: 13px; color: var(--danger); margin-top: -6px; margin-bottom: 10px; }
+  #app { width: 100%; max-width: 560px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* Class list cards */
+  .class-card {
+    border: 0.5px solid var(--border-strong); border-radius: var(--radius-lg);
+    background: var(--surface); margin-bottom: 12px; overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .class-card-header {
+    display: flex; align-items: center; gap: 12px; padding: 16px 20px;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .class-card-header:hover { background: var(--bg); }
+  .class-card-header.open { background: var(--bg); }
+  .class-info { flex: 1; }
+  .class-name { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+  .class-meta { font-size: 12px; color: var(--muted); display: flex; gap: 12px; }
+  .class-body { border-top: 0.5px solid var(--border); padding: 16px 20px; }
+  .queue-row {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    background: var(--bg); border-radius: var(--radius); margin-bottom: 8px;
+    border: 0.5px solid var(--border); animation: slideIn 0.2s ease;
+  }
+  .queue-row.first { background: var(--accent-light); border-color: rgba(45,91,227,0.25); }
+  .queue-row.first .qr-name { color: var(--accent-text); }
+  @keyframes slideIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+  .qr-num  { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); min-width:20px; }
+  .qr-name { flex:1; font-weight:500; font-size:14px; }
+  .qr-time { font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; }
+  .chevron { font-size: 12px; color: var(--muted); transition: transform 0.2s; }
+  .chevron.open { transform: rotate(180deg); }
+  .queue-count-badge {
+    font-size: 11px; font-weight: 600; background: var(--warn-light); color: var(--warn);
+    border-radius: 99px; padding: 2px 8px; border: 0.5px solid rgba(184,92,0,0.2);
+  }
+  .queue-count-badge.zero { background: var(--success-light); color: var(--success); border-color: rgba(26,122,74,0.2); }
+
+  /* Login screen */
+  .login-wrap { text-align: center; padding: 48px 0 24px; }
+  .login-wrap h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+  .login-wrap p  { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+
+  /* Create class form */
+  .form-row { display: flex; gap: 10px; }
+  .form-row input { flex: 1; }
+
+  /* Unauth banner */
+  .unauth-banner {
+    background: var(--danger-light); border: 0.5px solid rgba(192,57,43,0.2);
+    border-radius: var(--radius); padding: 12px 16px; font-size: 13px;
+    color: var(--danger); margin-bottom: 16px; display: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- LOADING -->
+  <div id="s-loading" class="section active" style="text-align:center;padding:80px 0;color:var(--muted);font-size:14px;">
+    Loading…
+  </div>
+
+  <!-- LOGIN -->
+  <div id="s-login" class="section">
+    <div style="max-width:400px;margin:0 auto;">
+      <div class="login-wrap">
+        <div style="font-size:40px;margin-bottom:16px">📋</div>
+        <h2>Teacher Portal</h2>
+        <p>Sign in with your Google account to manage your classes and queues.</p>
+        <button class="btn-google" onclick="signInWithGoogle()">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+          Sign in with Google
+        </button>
+        <div class="unauth-banner" id="unauth-banner">
+          Your Google account is not authorized as a teacher. Contact your administrator.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN PORTAL -->
+  <div id="s-portal" class="section">
+    <div class="topbar">
+      <h1>📋 Teacher Portal</h1>
+      <div class="topbar-right">
+        <div class="avatar" id="user-avatar" style="display:none">
+          <img id="user-photo" src="" alt="">
+        </div>
+        <span id="user-name" style="font-size:13px;color:var(--muted)"></span>
+        <button class="btn-ghost" style="font-size:12px;padding:5px 10px" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+
+    <!-- Create class -->
+    <div class="card">
+      <div class="card-label">Create a New Class</div>
+      <input type="text" id="i-classname" placeholder="Class name (e.g. Period 3 Math)" maxlength="48" />
+      <div style="display:flex;gap:10px">
+        <input type="text" id="i-classcode" placeholder="Class code (e.g. MATH3)" maxlength="10"
+          style="text-transform:uppercase;margin-bottom:0;flex:1" />
+        <button class="btn-primary" onclick="createClass()" style="white-space:nowrap">Create Class</button>
+      </div>
+      <div class="err" style="margin-top:10px" id="e-create"></div>
+    </div>
+
+    <!-- My classes -->
+    <div class="card-label" style="padding:0 4px;margin-bottom:12px">My Classes</div>
+    <div id="classes-list"><div style="text-align:center;padding:32px 0;color:var(--muted);font-size:14px">Loading your classes…</div></div>
+  </div>
+
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp }                           from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut as fbSignOut }
+                                                    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getDatabase, ref, get, set, push, remove, onValue, serverTimestamp }
+                                                    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAMidsyva-82OJVpPgaJMGIxDoWi75Y58I",
+  authDomain: "classqueue-66037.firebaseapp.com",
+  databaseURL: "https://classqueue-66037-default-rtdb.firebaseio.com",
+  projectId: "classqueue-66037",
+  storageBucket: "classqueue-66037.firebasestorage.app",
+  messagingSenderId: "523072247188",
+  appId: "1:523072247188:web:d61bf93c03b6fbe3dc2b81"
+};
+
+// ── List of authorized teacher emails ──
+const AUTHORIZED_EMAILS = [
+  // Add teacher emails here, one per line, e.g.:
+  // "teacher@school.edu",
+  // "another@school.edu",
+];
+
+const fbApp = initializeApp(firebaseConfig);
+const auth  = getAuth(fbApp);
+const db    = getDatabase(fbApp);
+
+let currentUser = null;
+let classUnsubs = {}; // live queue listeners keyed by classCode
+
+// ── Navigation ──
+function go(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function timeAgo(ts) {
+  const s = Math.floor((Date.now()-ts)/1000);
+  if (s < 60) return s+'s ago';
+  const m = Math.floor(s/60);
+  if (m < 60) return m+'m ago';
+  return Math.floor(m/60)+'h ago';
+}
+
+// ── Auth ──
+window.signInWithGoogle = async () => {
+  const provider = new GoogleAuthProvider();
+  try {
+    await signInWithPopup(auth, provider);
+  } catch(e) {
+    console.error(e);
+  }
+};
+
+window.signOut = () => fbSignOut(auth);
+
+onAuthStateChanged(auth, user => {
+  if (user) {
+    // Check authorization
+    if (AUTHORIZED_EMAILS.length > 0 && !AUTHORIZED_EMAILS.includes(user.email)) {
+      fbSignOut(auth);
+      document.getElementById('unauth-banner').style.display = 'block';
+      go('s-login');
+      return;
+    }
+    currentUser = user;
+    // Set up UI
+    document.getElementById('user-name').textContent = user.displayName || user.email;
+    if (user.photoURL) {
+      document.getElementById('user-photo').src = user.photoURL;
+      document.getElementById('user-avatar').style.display = 'block';
+    }
+    go('s-portal');
+    loadClasses();
+  } else {
+    currentUser = null;
+    // Unsubscribe all listeners
+    Object.values(classUnsubs).forEach(u => u && u());
+    classUnsubs = {};
+    go('s-login');
+  }
+});
+
+// ── Load teacher's classes ──
+async function loadClasses() {
+  const snap = await get(ref(db, `teacherClasses/${currentUser.uid}`));
+  const el = document.getElementById('classes-list');
+  if (!snap.exists()) {
+    el.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--muted);font-size:14px">No classes yet. Create one above.</div>';
+    return;
+  }
+  const classes = Object.entries(snap.val()).map(([k,v]) => ({...v, _key:k}));
+  classes.sort((a,b) => a.createdAt - b.createdAt);
+  el.innerHTML = '';
+  classes.forEach(cls => renderClassCard(cls));
+}
+
+// ── Render a class card ──
+function renderClassCard(cls) {
+  const el = document.getElementById('classes-list');
+  const card = document.createElement('div');
+  card.className = 'class-card';
+  card.id = `cls-${cls.code}`;
+  card.innerHTML = `
+    <div class="class-card-header" onclick="toggleClass('${cls.code}')">
+      <div class="class-info">
+        <div class="class-name">${esc(cls.className)}</div>
+        <div class="class-meta">
+          <span>Code: <strong style="font-family:'DM Mono',monospace;letter-spacing:0.05em">${esc(cls.code)}</strong></span>
+          <span id="cls-count-${cls.code}">Loading…</span>
+        </div>
+      </div>
+      <span class="queue-count-badge zero" id="cls-badge-${cls.code}">0 waiting</span>
+      <span class="chevron" id="cls-chev-${cls.code}">▼</span>
+    </div>
+    <div class="class-body" id="cls-body-${cls.code}" style="display:none">
+      <div id="cls-queue-${cls.code}"><div style="color:var(--muted);font-size:13px">Loading queue…</div></div>
+      <hr class="divider">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-primary" style="font-size:13px;padding:7px 14px" onclick="clearQueue('${cls.code}')">Clear Queue</button>
+        <button class="btn-danger-sm" onclick="deleteClass('${cls.code}','${esc(cls.className)}')">Delete Class</button>
+      </div>
+    </div>`;
+  el.appendChild(card);
+
+  // Start live listener for this class
+  startQueueListener(cls.code);
+}
+
+// ── Toggle class body open/closed ──
+window.toggleClass = (code) => {
+  const body = document.getElementById(`cls-body-${code}`);
+  const chev = document.getElementById(`cls-chev-${code}`);
+  const hdr  = document.querySelector(`#cls-${code} .class-card-header`);
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  chev.classList.toggle('open', !open);
+  hdr.classList.toggle('open', !open);
+};
+
+// ── Live queue listener ──
+function startQueueListener(code) {
+  if (classUnsubs[code]) classUnsubs[code]();
+  classUnsubs[code] = onValue(ref(db, `classes/${code}/queue`), snap => {
+    const raw = snap.exists() ? snap.val() : {};
+    const q = Object.entries(raw).map(([k,v]) => ({...v,_key:k})).sort((a,b)=>a.ts-b.ts);
+    updateClassQueue(code, q);
+  });
+}
+
+function updateClassQueue(code, q) {
+  const badge = document.getElementById(`cls-badge-${code}`);
+  const qEl   = document.getElementById(`cls-queue-${code}`);
+  if (!badge || !qEl) return;
+
+  badge.textContent = q.length + ' waiting';
+  badge.className = 'queue-count-badge' + (q.length===0 ? ' zero' : '');
+
+  if (!q.length) {
+    qEl.innerHTML = '<div class="empty" style="padding:16px 0 8px">✅ Queue is empty</div>';
+    return;
+  }
+  qEl.innerHTML = q.map((item,i) => `
+    <div class="queue-row ${i===0?'first':''}">
+      <span class="qr-num">${i+1}</span>
+      <span class="qr-name">${esc(item.name)}</span>
+      <span class="qr-time">${timeAgo(item.ts)}</span>
+      <button class="done-btn" onclick="removeFromQueue('${code}','${item._key}')">Done ✓</button>
+    </div>`).join('');
+}
+
+// ── Remove one student ──
+window.removeFromQueue = async (code, key) => {
+  await remove(ref(db, `classes/${code}/queue/${key}`));
+};
+
+// ── Clear whole queue ──
+window.clearQueue = async (code) => {
+  if (!confirm('Clear the entire queue for this class?')) return;
+  await set(ref(db, `classes/${code}/queue`), null);
+};
+
+// ── Create class ──
+window.createClass = async () => {
+  const name = document.getElementById('i-classname').value.trim();
+  const code = document.getElementById('i-classcode').value.trim().toUpperCase();
+  const err  = document.getElementById('e-create');
+
+  if (!name) { err.textContent = 'Enter a class name.'; return; }
+  if (!code) { err.textContent = 'Enter a class code.'; return; }
+  if (!/^[A-Z0-9]{2,10}$/.test(code)) { err.textContent = 'Code must be 2–10 letters/numbers, no spaces.'; return; }
+
+  // Check code not already taken
+  const existing = await get(ref(db, `classes/${code}/config`));
+  if (existing.exists()) { err.textContent = `Code "${code}" is already in use. Choose another.`; return; }
+
+  const classData = { className: name, code, ownerUid: currentUser.uid, createdAt: Date.now() };
+
+  // Save config (readable by students, writable only by owner via rules)
+  await set(ref(db, `classes/${code}/config`), classData);
+
+  // Save reference under teacher's node
+  await push(ref(db, `teacherClasses/${currentUser.uid}`), classData);
+
+  err.textContent = '';
+  document.getElementById('i-classname').value = '';
+  document.getElementById('i-classcode').value = '';
+
+  // Add to UI immediately
+  renderClassCard(classData);
+};
+
+// ── Delete class ──
+window.deleteClass = async (code, name) => {
+  if (!confirm(`Delete class "${name}" and its entire queue? This cannot be undone.`)) return;
+
+  // Remove config + queue
+  await set(ref(db, `classes/${code}`), null);
+
+  // Remove from teacher's list
+  const snap = await get(ref(db, `teacherClasses/${currentUser.uid}`));
+  if (snap.exists()) {
+    for (const [k, v] of Object.entries(snap.val())) {
+      if (v.code === code) {
+        await remove(ref(db, `teacherClasses/${currentUser.uid}/${k}`));
+        break;
+      }
+    }
+  }
+
+  // Stop listener + remove card
+  if (classUnsubs[code]) { classUnsubs[code](); delete classUnsubs[code]; }
+  const card = document.getElementById(`cls-${code}`);
+  if (card) card.remove();
+
+  // Show empty state if no classes left
+  if (!document.getElementById('classes-list').children.length) {
+    document.getElementById('classes-list').innerHTML =
+      '<div style="text-align:center;padding:32px 0;color:var(--muted);font-size:14px">No classes yet. Create one above.</div>';
+  }
+};
+</script>
+</body>
+</html>
