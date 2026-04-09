@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Console</title>
+<title>Admin Console — Class Help Queue</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -13,11 +13,12 @@
   --accent:#2D5BE3;--accent-light:#EEF2FD;--accent-text:#1A3BB0;
   --danger:#C0392B;--danger-light:#FEF0EE;
   --success:#1A7A4A;--success-light:#EDFAF3;
+  --warn:#B85C00;--warn-light:#FEF7EE;
   --r:10px;--rl:16px;
   --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04)
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px 48px}
-#app{width:100%;max-width:520px}
+#app{width:100%;max-width:600px}
 .section{display:none}.section.active{display:block}
 .card{background:var(--surface);border-radius:var(--rl);border:.5px solid var(--border-strong);padding:24px;box-shadow:var(--shadow);margin-bottom:16px}
 .lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px}
@@ -33,8 +34,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .btn-google{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:var(--text);border:.5px solid var(--border-strong);width:100%;padding:11px 18px;font-size:15px;box-shadow:var(--shadow);border-radius:var(--r)}
 .btn-google:hover{background:var(--bg)}
 .divider{border:none;border-top:.5px solid var(--border);margin:16px 0}
-.err{font-size:13px;color:var(--danger);margin-top:8px}
-.ok{font-size:13px;color:var(--success);margin-top:8px}
+.err{font-size:13px;color:var(--danger);margin-top:8px;display:none}
+.ok{font-size:13px;color:var(--success);margin-top:8px;display:none}
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
 .topbar h1{font-size:20px;font-weight:600;letter-spacing:-.3px}
 .topbar-right{display:flex;align-items:center;gap:10px}
@@ -50,8 +51,25 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .btn-remove{font-size:12px;padding:5px 10px;background:var(--danger-light);color:var(--danger);border-radius:6px;border:.5px solid rgba(192,57,43,.2);cursor:pointer;font-family:inherit;font-weight:500;flex-shrink:0}
 .btn-remove:hover{opacity:.8}
 .empty{text-align:center;padding:24px 0 8px;color:var(--muted);font-size:14px}
-.admin-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;background:var(--accent-light);color:var(--accent-text);border:.5px solid rgba(45,91,227,.2)}
 .info-note{background:var(--accent-light);border:.5px solid rgba(45,91,227,.2);border-radius:var(--r);padding:12px 14px;font-size:13px;color:var(--accent-text);margin-bottom:16px;line-height:1.5}
+/* tabs */
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--surface);border-radius:var(--r);padding:4px;border:.5px solid var(--border-strong);box-shadow:var(--shadow)}
+.tab-btn{flex:1;padding:8px 14px;border-radius:7px;border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s,color .15s}
+.tab-btn.active{background:var(--accent);color:#fff}
+.tab-pane{display:none}.tab-pane.active{display:block}
+/* classes table */
+.cls-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg);border-radius:var(--r);border:.5px solid var(--border);margin-bottom:8px}
+.cls-info{flex:1}
+.cls-name{font-weight:600;font-size:14px;margin-bottom:2px}
+.cls-meta{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace}
+.cls-teacher{font-size:12px;color:var(--muted);margin-top:2px}
+.badge-code{font-family:'DM Mono',monospace;font-size:12px;font-weight:600;background:var(--accent-light);color:var(--accent-text);border-radius:6px;padding:2px 8px;border:.5px solid rgba(45,91,227,.2)}
+.badge-q{font-size:11px;font-weight:600;border-radius:99px;padding:2px 8px}
+.badge-q-warn{background:var(--warn-light);color:var(--warn);border:.5px solid rgba(184,92,0,.2)}
+.badge-q-ok{background:var(--success-light);color:var(--success);border:.5px solid rgba(26,122,74,.2)}
+.nav-links{display:flex;gap:16px;justify-content:center;margin-top:8px;font-size:13px}
+.nav-links a{color:var(--muted);text-decoration:none}
+.nav-links a:hover{color:var(--accent)}
 </style>
 </head>
 <body>
@@ -64,7 +82,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
     <div class="login-center">
       <div style="font-size:40px;margin-bottom:16px">🔐</div>
       <h2>Admin Console</h2>
-      <p>Sign in with your admin Google account to manage authorized teachers.</p>
+      <p>Sign in with your admin Google account to manage teachers and classes.</p>
       <button class="btn-google" id="signin-btn" onclick="doSignIn()">
         <svg width="18" height="18" viewBox="0 0 18 18">
           <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
@@ -76,6 +94,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
       </button>
       <div class="unauth" id="unauth-msg">This account does not have admin access.</div>
     </div>
+    <div class="nav-links"><a href="index.html">← Home</a></div>
   </div>
 
   <div id="s-admin" class="section">
@@ -84,31 +103,46 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <div class="topbar-right">
         <div class="avatar" id="user-avatar" style="display:none"><img id="user-photo" src="" alt=""></div>
         <span id="user-name" style="font-size:13px;color:var(--muted)"></span>
+        <a href="teacher.html" style="font-size:12px;color:var(--success);text-decoration:none;padding:5px 10px;border:.5px solid rgba(26,122,74,.3);border-radius:var(--r);background:var(--success-light)">Teacher Portal →</a>
         <button class="btn-ghost" style="font-size:12px;padding:5px 10px" onclick="doSignOut()">Sign out</button>
       </div>
     </div>
 
-    <div class="info-note">
-      Authorized teachers can sign in to the Teacher Portal. Add their Google email addresses below. The list is stored securely in Firebase — it is never visible in the page source.
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('teachers')">Authorized Teachers</button>
+      <button class="tab-btn" onclick="switchTab('classes')">All Classes</button>
     </div>
 
-    <div class="card">
-      <div class="lbl">Add Authorized Teacher</div>
-      <div style="display:flex;gap:10px;align-items:flex-start">
-        <input type="email" id="i-email" placeholder="teacher@school.edu" style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter')addTeacher()">
-        <button class="btn-primary" onclick="addTeacher()">Add</button>
+    <!-- TEACHERS TAB -->
+    <div id="tab-teachers" class="tab-pane active">
+      <div class="info-note">
+        Authorized teachers can sign in to the Teacher Portal. Their Google email addresses are stored securely in Firebase and never visible in source code.
       </div>
-      <div class="err" id="e-add" style="display:none"></div>
-      <div class="ok"  id="ok-add" style="display:none"></div>
+      <div class="card">
+        <div class="lbl">Add Authorized Teacher</div>
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <input type="email" id="i-email" placeholder="teacher@school.edu" style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter')addTeacher()">
+          <button class="btn-primary" onclick="addTeacher()">Add</button>
+        </div>
+        <div class="err" id="e-add"></div>
+        <div class="ok"  id="ok-add"></div>
+      </div>
+      <div class="lbl" style="padding:0 4px;margin-bottom:12px">Authorized Teachers</div>
+      <div class="card" style="padding:16px">
+        <div id="teacher-list"><div class="empty">Loading...</div></div>
+      </div>
     </div>
 
-    <div class="lbl" style="padding:0 4px;margin-bottom:12px">Authorized Teachers</div>
-    <div class="card" style="padding:16px">
-      <div id="teacher-list"><div class="empty">Loading...</div></div>
+    <!-- CLASSES TAB -->
+    <div id="tab-classes" class="tab-pane">
+      <div class="card" style="padding:16px">
+        <div id="all-classes-list"><div class="empty">Loading...</div></div>
+      </div>
     </div>
 
-    <div style="margin-top:8px;text-align:right">
-      <a href="teacher.html" style="font-size:13px;color:var(--muted);text-decoration:none">Go to Teacher Portal →</a>
+    <div class="nav-links">
+      <a href="index.html">← Home</a>
+      <a href="teacher.html">Teacher Portal →</a>
     </div>
   </div>
 </div>
@@ -116,123 +150,161 @@ button:disabled{opacity:.45;cursor:not-allowed}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getDatabase, ref, get, push, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, get, set, push, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-const cfg = {
-  apiKey: "AIzaSyAMidsyva-82OJVpPgaJMGIxDoWi75Y58I",
-  authDomain: "classqueue-66037.firebaseapp.com",
-  databaseURL: "https://classqueue-66037-default-rtdb.firebaseio.com",
-  projectId: "classqueue-66037",
-  storageBucket: "classqueue-66037.firebasestorage.app",
-  messagingSenderId: "523072247188",
-  appId: "1:523072247218:web:d61bf93c03b6fbe3dc2b81"
+const cfg={apiKey:"AIzaSyAMidsyva-82OJVpPgaJMGIxDoWi75Y58I",authDomain:"classqueue-66037.firebaseapp.com",databaseURL:"https://classqueue-66037-default-rtdb.firebaseio.com",projectId:"classqueue-66037",storageBucket:"classqueue-66037.firebasestorage.app",messagingSenderId:"523072247188",appId:"1:523072247188:web:d61bf93c03b6fbe3dc2b81"};
+var fbApp=initializeApp(cfg);
+var auth=getAuth(fbApp);
+var db=getDatabase(fbApp);
+var prov=new GoogleAuthProvider();
+var me=null;
+var listUnsub=null;
+
+function go(id){document.querySelectorAll(".section").forEach(function(s){s.classList.remove("active");});document.getElementById(id).classList.add("active");}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function fmtDate(ts){return new Date(ts).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}
+
+window.switchTab=function(tab){
+  document.querySelectorAll(".tab-btn").forEach(function(b,i){b.classList.toggle("active",i===(tab==="teachers"?0:1));});
+  document.getElementById("tab-teachers").classList.toggle("active",tab==="teachers");
+  document.getElementById("tab-classes").classList.toggle("active",tab==="classes");
+  if(tab==="classes")loadAllClasses();
 };
 
-var fbApp = initializeApp(cfg);
-var auth  = getAuth(fbApp);
-var db    = getDatabase(fbApp);
-var prov  = new GoogleAuthProvider();
-var me    = null;
-var listUnsub = null;
-
-function go(id){
-  document.querySelectorAll(".section").forEach(function(s){ s.classList.remove("active"); });
-  document.getElementById(id).classList.add("active");
-}
-function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function fmtDate(ts){
-  return new Date(ts).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
-}
-
-window.doSignIn = function(){
+window.doSignIn=function(){
   var btn=document.getElementById("signin-btn");
-  btn.disabled=true; btn.textContent="Opening sign-in...";
-  signInWithPopup(auth,prov).catch(function(e){
-    console.error(e); btn.disabled=false; btn.textContent="Sign in with Google";
-  });
+  btn.disabled=true;btn.textContent="Opening sign-in...";
+  signInWithPopup(auth,prov).catch(function(e){console.error(e);btn.disabled=false;btn.textContent="Sign in with Google";});
 };
-window.doSignOut = function(){ signOut(auth); };
+window.doSignOut=function(){signOut(auth);};
 
-onAuthStateChanged(auth, function(user){
-  if (user) {
-    // Only admins can access this page
+onAuthStateChanged(auth,function(user){
+  if(user){
     get(ref(db,"adminConfig/admins/"+user.uid)).then(function(snap){
-      if (!snap.exists()) {
+      if(!snap.exists()){
         signOut(auth);
         document.getElementById("unauth-msg").style.display="block";
-        go("s-login"); return;
+        go("s-login");return;
       }
       me=user;
       document.getElementById("user-name").textContent=user.displayName||user.email;
-      if (user.photoURL) {
-        document.getElementById("user-photo").src=user.photoURL;
-        document.getElementById("user-avatar").style.display="block";
-      }
+      if(user.photoURL){document.getElementById("user-photo").src=user.photoURL;document.getElementById("user-avatar").style.display="block";}
       go("s-admin");
       listenTeachers();
-    }).catch(function(e){
-      console.error(e); signOut(auth); go("s-login");
-    });
-  } else {
+    }).catch(function(e){console.error(e);signOut(auth);go("s-login");});
+  }else{
     me=null;
-    if (listUnsub) { listUnsub(); listUnsub=null; }
+    if(listUnsub){listUnsub();listUnsub=null;}
     go("s-login");
   }
 });
 
 function listenTeachers(){
-  if (listUnsub) listUnsub();
-  listUnsub = onValue(ref(db,"adminConfig/authorizedEmails"), function(snap){
+  if(listUnsub)listUnsub();
+  listUnsub=onValue(ref(db,"adminConfig/authorizedEmails"),function(snap){
     var el=document.getElementById("teacher-list");
-    if (!snap.exists()) {
-      el.innerHTML='<div class="empty">No authorized teachers yet. Add one above.</div>';
-      return;
-    }
-    var entries=Object.entries(snap.val()).map(function(e){ return Object.assign({},e[1],{_key:e[0]}); });
-    entries.sort(function(a,b){ return (a.addedAt||0)-(b.addedAt||0); });
+    if(!snap.exists()){el.innerHTML='<div class="empty">No authorized teachers yet. Add one above.</div>';return;}
+    var entries=Object.entries(snap.val()).map(function(e){return Object.assign({},e[1],{_key:e[0]});});
+    entries.sort(function(a,b){return (a.addedAt||0)-(b.addedAt||0);});
     el.innerHTML=entries.map(function(t){
-      return '<div class="teacher-row">' +
-        '<div>' +
-          '<div class="teacher-email">'+esc(t.email)+'</div>' +
-          (t.addedAt?'<div class="teacher-added">Added '+fmtDate(t.addedAt)+'</div>':'') +
-        '</div>' +
-        '<button class="btn-remove" onclick="removeTeacher(\''+t._key+'\',\''+esc(t.email)+'\')">Remove</button>' +
+      return '<div class="teacher-row">'+
+        '<div>'+
+          '<div class="teacher-email">'+esc(t.email)+'</div>'+
+          (t.addedAt?'<div class="teacher-added">Added '+fmtDate(t.addedAt)+'</div>':'')+
+        '</div>'+
+        '<button class="btn-remove" onclick="removeTeacher(\''+t._key+'\',\''+esc(t.email)+'\')">Remove</button>'+
       '</div>';
     }).join("");
   });
 }
 
-window.addTeacher = function(){
+window.addTeacher=function(){
   var email=document.getElementById("i-email").value.trim().toLowerCase();
   var errEl=document.getElementById("e-add");
   var okEl=document.getElementById("ok-add");
-  errEl.style.display="none"; okEl.style.display="none";
-  if (!email) { errEl.textContent="Enter an email address."; errEl.style.display="block"; return; }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errEl.textContent="Enter a valid email address."; errEl.style.display="block"; return; }
-
-  // Check for duplicates
+  errEl.style.display="none";okEl.style.display="none";
+  if(!email){errEl.textContent="Enter an email address.";errEl.style.display="block";return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent="Enter a valid email address.";errEl.style.display="block";return;}
   get(ref(db,"adminConfig/authorizedEmails")).then(function(snap){
-    if (snap.exists()) {
+    if(snap.exists()){
       var vals=Object.values(snap.val());
-      for (var i=0;i<vals.length;i++) {
-        if (vals[i].email===email) {
-          errEl.textContent=email+" is already authorized.";
-          errEl.style.display="block"; return;
-        }
+      for(var i=0;i<vals.length;i++){
+        var stored=typeof vals[i]==="object"?vals[i].email:vals[i];
+        if(stored&&stored.toLowerCase()===email){errEl.textContent=email+" is already authorized.";errEl.style.display="block";return;}
       }
     }
-    push(ref(db,"adminConfig/authorizedEmails"),{ email:email, addedAt:Date.now() }).then(function(){
+    push(ref(db,"adminConfig/authorizedEmails"),{email:email,addedAt:Date.now()}).then(function(){
       document.getElementById("i-email").value="";
-      okEl.textContent=email+" has been added.";
-      okEl.style.display="block";
-      setTimeout(function(){ okEl.style.display="none"; }, 3000);
-    }).catch(function(e){ errEl.textContent="Error: "+e.message; errEl.style.display="block"; });
+      okEl.textContent=email+" has been added.";okEl.style.display="block";
+      setTimeout(function(){okEl.style.display="none";},3000);
+    }).catch(function(e){errEl.textContent="Error: "+e.message;errEl.style.display="block";});
   });
 };
 
-window.removeTeacher = function(key, email){
-  if (!confirm("Remove "+email+" as an authorized teacher?")) return;
+window.removeTeacher=function(key,email){
+  if(!confirm("Remove "+email+" as an authorized teacher?"))return;
   remove(ref(db,"adminConfig/authorizedEmails/"+key));
+};
+
+function loadAllClasses(){
+  var el=document.getElementById("all-classes-list");
+  el.innerHTML='<div class="empty">Loading...</div>';
+  get(ref(db,"classes")).then(function(snap){
+    if(!snap.exists()){el.innerHTML='<div class="empty">No classes found.</div>';return;}
+    var classes=[];
+    var entries=Object.entries(snap.val());
+    var pending=entries.length;
+    if(!pending){el.innerHTML='<div class="empty">No classes found.</div>';return;}
+    entries.forEach(function(e){
+      var code=e[0];
+      var data=e[1];
+      var config=data.config||{};
+      var qCount=data.queue?Object.keys(data.queue).length:0;
+      classes.push({code:code,className:config.className||"(unnamed)",ownerEmail:config.ownerEmail||"Unknown",createdAt:config.createdAt||0,qCount:qCount});
+      pending--;
+      if(pending===0){
+        classes.sort(function(a,b){return (a.ownerEmail||"").localeCompare(b.ownerEmail||"")||a.className.localeCompare(b.className);});
+        renderAllClasses(classes);
+      }
+    });
+  }).catch(function(e){el.innerHTML='<div class="empty">Error loading classes: '+esc(e.message)+'</div>';});
+}
+
+function renderAllClasses(classes){
+  var el=document.getElementById("all-classes-list");
+  if(!classes.length){el.innerHTML='<div class="empty">No classes found.</div>';return;}
+  el.innerHTML=classes.map(function(c){
+    return '<div class="cls-row">'+
+      '<div class="cls-info">'+
+        '<div class="cls-name">'+esc(c.className)+'</div>'+
+        '<div class="cls-meta">'+esc(c.code)+(c.createdAt?' &nbsp;·&nbsp; Created '+fmtDate(c.createdAt):'')+'</div>'+
+        '<div class="cls-teacher">👩‍🏫 '+esc(c.ownerEmail)+'</div>'+
+      '</div>'+
+      '<span class="badge-q '+(c.qCount>0?"badge-q-warn":"badge-q-ok")+'">'+c.qCount+' waiting</span>'+
+      '<button class="btn-remove" onclick="adminDeleteClass(\''+esc(c.code)+'\',\''+esc(c.className)+'\')">Delete</button>'+
+    '</div>';
+  }).join("");
+}
+
+window.adminDeleteClass=function(code,name){
+  if(!confirm('Delete class "'+name+'" (code: '+code+') and its entire queue? This cannot be undone.'))return;
+  // Delete class data
+  set(ref(db,"classes/"+code),null).then(function(){
+    // Find and remove from any teacher's list
+    get(ref(db,"teacherClasses")).then(function(snap){
+      if(!snap.exists())return;
+      Object.entries(snap.val()).forEach(function(uidEntry){
+        var uid=uidEntry[0];
+        var classes=uidEntry[1];
+        Object.entries(classes).forEach(function(clsEntry){
+          if(clsEntry[1].code===code){
+            remove(ref(db,"teacherClasses/"+uid+"/"+clsEntry[0]));
+          }
+        });
+      });
+    });
+    loadAllClasses();
+  });
 };
 </script>
 </body>
