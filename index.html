@@ -83,10 +83,12 @@
   .teacher-item .tname { flex:1; font-weight:500; }
   .teacher-item.first .tname { color:var(--success); }
   .done-btn {
-    font-size:12px; padding:5px 10px; background:var(--danger-light); color:var(--danger);
-    border-radius:6px; border:none; cursor:pointer; font-family:inherit; font-weight:500;
+    font-size:12px; padding:6px 12px; background:var(--danger-light); color:var(--danger);
+    border-radius:6px; border:0.5px solid rgba(192,57,43,0.2); cursor:pointer;
+    font-family:inherit; font-weight:500; flex-shrink:0;
+    transition: background 0.15s;
   }
-  .done-btn:hover { opacity:0.8; }
+  .done-btn:hover { background:#f5c6c2; }
   .divider { border:none; border-top:0.5px solid var(--border); margin:16px 0; }
   .meta-row { display:flex; align-items:center; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:12px; }
   .pos-info { text-align:center; padding:12px; font-size:14px; color:var(--muted); margin-bottom:12px; }
@@ -108,6 +110,17 @@
   #app { width:100%; max-width:460px; }
   .section { display:none; }
   .section.active { display:block; }
+  .setup-note {
+    background: #fffbea; border: 0.5px solid #e6d48a; border-radius: var(--radius);
+    padding: 12px 14px; font-size: 13px; color: #7a6200; margin-bottom: 14px; line-height: 1.5;
+  }
+  .setup-note code {
+    background: rgba(0,0,0,0.07); border-radius: 4px; padding: 1px 5px;
+    font-family: 'DM Mono', monospace; font-size: 12px;
+  }
+  .spinner-wrap { text-align:center; padding: 32px 0; color: var(--muted); font-size:14px; }
+  .dot-spin { display:inline-block; animation: spin 1s linear infinite; margin-right:6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -123,8 +136,14 @@
   <div id="s-land" class="section active">
     <div class="card">
       <div class="card-label">I am a…</div>
-      <button class="btn-primary" style="margin-bottom:10px;" onclick="go('s-scode')">Student — Join the Queue</button>
-      <button class="btn-ghost" style="width:100%;" onclick="go('s-tlogin')">Teacher — Manage Queue</button>
+      <button class="btn-primary" style="margin-bottom:10px" onclick="go('s-scode')">Student — Join the Queue</button>
+      <button class="btn-ghost" style="width:100%" onclick="go('s-tlogin')">Teacher — Manage Queue</button>
+    </div>
+    <div id="firebase-warning" style="display:none" class="card" style="border-color:var(--danger)">
+      <div class="card-label" style="color:var(--danger)">Setup needed</div>
+      <p style="font-size:13px;color:var(--danger);line-height:1.6">
+        Firebase is not configured yet. See the setup instructions inside the HTML file — search for <strong>FIREBASE CONFIG</strong>.
+      </p>
     </div>
   </div>
 
@@ -132,13 +151,13 @@
   <div id="s-scode" class="section">
     <div class="card">
       <div class="card-label">Student — Step 1 of 2</div>
-      <p style="font-size:14px;color:var(--muted);margin-bottom:14px;">Enter the class code your teacher gave you.</p>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:14px">Enter the class code your teacher gave you.</p>
       <input type="text" id="i-scode" placeholder="Class code (e.g. MATH3)" maxlength="20"
         style="text-transform:uppercase" onkeydown="if(event.key==='Enter')sCheckCode()" />
       <div class="err" id="e-scode"></div>
       <button class="btn-primary" onclick="sCheckCode()">Next →</button>
       <hr class="divider">
-      <button class="btn-ghost" style="width:100%;font-size:13px;" onclick="go('s-land')">← Back</button>
+      <button class="btn-ghost" style="width:100%;font-size:13px" onclick="go('s-land')">← Back</button>
     </div>
   </div>
 
@@ -152,14 +171,14 @@
       <div class="err" id="e-sname"></div>
       <button class="btn-primary" onclick="sEnter()">Enter Queue →</button>
       <hr class="divider">
-      <button class="btn-ghost" style="width:100%;font-size:13px;" onclick="go('s-scode')">← Back</button>
+      <button class="btn-ghost" style="width:100%;font-size:13px" onclick="go('s-scode')">← Back</button>
     </div>
   </div>
 
   <!-- STUDENT main -->
   <div id="s-smain" class="section">
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div class="card-label" style="margin-bottom:0" id="smain-class"></div>
         <span style="font-size:13px;font-weight:500;color:var(--muted)" id="smain-name"></span>
       </div>
@@ -167,7 +186,7 @@
       <div id="s-pos" style="display:none" class="pos-info">
         <strong id="s-pos-n"></strong><span id="s-pos-t"></span>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <div style="display:flex;gap:8px;margin-bottom:16px">
         <button class="btn-primary" id="s-join" onclick="sJoin()" style="flex:1">✋ Join Queue</button>
         <button class="btn-danger" id="s-leave" onclick="sLeave()" style="flex:1;display:none">✓ Leave Queue</button>
       </div>
@@ -176,7 +195,7 @@
         <span><strong id="s-count">0</strong> waiting</span>
         <button class="link-btn" onclick="sLogout()">Change name / class</button>
       </div>
-      <div id="s-list"></div>
+      <div id="s-list"><div class="spinner-wrap"><span class="dot-spin">⟳</span> Loading…</div></div>
     </div>
   </div>
 
@@ -190,10 +209,10 @@
       <div class="err" id="e-tlogin"></div>
       <button class="btn-primary" onclick="tLogin()">Enter Dashboard</button>
       <hr class="divider">
-      <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">First time? Create your class below.</p>
-      <button class="btn-ghost" style="width:100%;font-size:13px;" onclick="go('s-tsetup')">Set Up New Class</button>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px">First time? Create your class below.</p>
+      <button class="btn-ghost" style="width:100%;font-size:13px" onclick="go('s-tsetup')">Set Up New Class</button>
       <hr class="divider">
-      <button class="btn-ghost" style="width:100%;font-size:13px;" onclick="go('s-land')">← Back</button>
+      <button class="btn-ghost" style="width:100%;font-size:13px" onclick="go('s-land')">← Back</button>
     </div>
   </div>
 
@@ -201,7 +220,7 @@
   <div id="s-tsetup" class="section">
     <div class="card">
       <div class="card-label">Create a Class</div>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px">
         Students type the class code to join. The passcode is only for teacher access.
       </p>
       <input type="text" id="i-tclassname" placeholder="Class name (e.g. Period 3 Math)" maxlength="48" />
@@ -212,21 +231,21 @@
       <div class="err" id="e-tsetup"></div>
       <button class="btn-primary" onclick="tSetup()">Create Class →</button>
       <hr class="divider">
-      <button class="btn-ghost" style="width:100%;font-size:13px;" onclick="go('s-tlogin')">← Back</button>
+      <button class="btn-ghost" style="width:100%;font-size:13px" onclick="go('s-tlogin')">← Back</button>
     </div>
   </div>
 
   <!-- TEACHER dashboard -->
   <div id="s-tdash" class="section">
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div class="card-label" style="margin-bottom:0" id="t-classname">Queue</div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <span style="font-size:11px;color:var(--muted);">● live</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="t-live-dot" style="font-size:11px;color:var(--success)">● live</span>
           <button class="btn-ghost" style="font-size:12px;padding:5px 10px" onclick="tLogout()">Sign out</button>
         </div>
       </div>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">Share this code with students:</p>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:8px">Share this code with students:</p>
       <div class="code-box" id="t-codebox"></div>
       <div id="t-banner" style="display:none" class="status-bar s-next">
         🎉 Next up: <strong id="t-next" style="margin-left:4px"></strong>
@@ -236,49 +255,128 @@
         <button class="link-btn" onclick="tClearAll()">Clear all</button>
       </div>
       <hr class="divider">
-      <div id="t-list"></div>
+      <div id="t-list"><div class="spinner-wrap"><span class="dot-spin">⟳</span> Loading…</div></div>
     </div>
   </div>
 
 </div>
 
+<!-- ============================================================
+     FIREBASE SETUP INSTRUCTIONS
+     ============================================================
+     To make this work across all devices, you need a free
+     Firebase Realtime Database. Here's how (takes ~5 minutes):
+
+     1. Go to https://console.firebase.google.com
+     2. Click "Add project" → name it anything → click through
+     3. In the left sidebar: Build → Realtime Database → Create database
+     4. Choose "Start in TEST MODE" (allows read/write for 30 days,
+        enough to get going — you can tighten rules later)
+     5. Copy your database URL — looks like:
+        https://YOUR-PROJECT-default-rtdb.firebaseio.com
+     6. Go to Project Settings (gear icon) → General → scroll to
+        "Your apps" → click </> (Web) → register app → copy the
+        firebaseConfig object values
+     7. Paste the values below where it says PASTE YOUR VALUES HERE
+
+     When done, re-upload classroom-queue.html to GitHub.
+     ============================================================ -->
+
 <script>
-/* ── App state ── */
+// ============================================================
+// PASTE YOUR FIREBASE VALUES HERE
+// ============================================================
+const FIREBASE_DB_URL = "https://classqueue-66037-default-rtdb.firebaseio.com/";
+// Example: "https://my-class-queue-default-rtdb.firebaseio.com"
+// ============================================================
+
+// ── Check config ──
+const FB_OK = FIREBASE_DB_URL && !FIREBASE_DB_URL.includes("PASTE");
+if (!FB_OK) document.getElementById('firebase-warning').style.display = 'block';
+
+// ── Firebase REST helpers ──
+// We use the Firebase REST API (no SDK needed — works in any iframe)
+async function fbGet(path) {
+  if (!FB_OK) return null;
+  try {
+    const r = await fetch(`${FIREBASE_DB_URL}/${path}.json`);
+    return r.ok ? await r.json() : null;
+  } catch { return null; }
+}
+
+async function fbSet(path, data) {
+  if (!FB_OK) return;
+  await fetch(`${FIREBASE_DB_URL}/${path}.json`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+}
+
+async function fbPush(path, data) {
+  if (!FB_OK) return null;
+  try {
+    const r = await fetch(`${FIREBASE_DB_URL}/${path}.json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const j = await r.json();
+    return j.name; // Firebase push key
+  } catch { return null; }
+}
+
+async function fbDelete(path) {
+  if (!FB_OK) return;
+  await fetch(`${FIREBASE_DB_URL}/${path}.json`, { method: 'DELETE' });
+}
+
+// ── App state ──
 let A = { code: null, className: null, name: null, teacher: false, iv: null };
 
-/* ── Navigation ── */
+// ── Navigation ──
 function go(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-/* ── Utilities ── */
+// ── Utilities ──
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function timeAgo(ts) {
-  const s = Math.floor((Date.now()-ts)/1000);
-  if (s < 60) return s+'s ago';
-  const m = Math.floor(s/60);
-  if (m < 60) return m+'m ago';
-  return Math.floor(m/60)+'h ago';
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return s + 's ago';
+  const m = Math.floor(s / 60);
+  if (m < 60) return m + 'm ago';
+  return Math.floor(m / 60) + 'h ago';
 }
 
-/* ── Storage ── */
-function qKey(c)   { return 'chq_q_'+(c||'').toUpperCase(); }
-function cfgKey(c) { return 'chq_c_'+(c||'').toUpperCase(); }
-function getQ(c)   { try { return JSON.parse(localStorage.getItem(qKey(c))||'[]'); } catch { return []; } }
-function setQ(c,q) { localStorage.setItem(qKey(c), JSON.stringify(q)); }
-function getCfg(c) { try { return JSON.parse(localStorage.getItem(cfgKey(c))); } catch { return null; } }
-function setCfg(c,v){ localStorage.setItem(cfgKey(c.toUpperCase()), JSON.stringify(v)); }
+// ── Firebase paths ──
+function cfgPath(code) { return `classes/${code.toUpperCase()}/config`; }
+function qPath(code)   { return `classes/${code.toUpperCase()}/queue`; }
 
-/* ── Student: check class code ── */
-function sCheckCode() {
+// ── Queue helpers ──
+async function getQueue(code) {
+  const data = await fbGet(qPath(code));
+  if (!data) return [];
+  // Convert Firebase object to sorted array
+  return Object.entries(data)
+    .map(([key, val]) => ({ ...val, _key: key }))
+    .sort((a, b) => a.ts - b.ts);
+}
+
+// ── Student: check class code ──
+async function sCheckCode() {
   const raw = document.getElementById('i-scode').value.trim().toUpperCase();
   const err = document.getElementById('e-scode');
   if (!raw) { err.textContent = 'Enter your class code.'; return; }
-  const cfg = getCfg(raw);
-  if (!cfg) { err.textContent = `No class found for "${raw}". Double-check with your teacher.`; return; }
+  if (!FB_OK) { err.textContent = 'Firebase is not configured yet. Ask your teacher.'; return; }
+  const btn = document.querySelector('#s-scode .btn-primary');
+  btn.disabled = true; btn.textContent = 'Checking…';
+  const cfg = await fbGet(cfgPath(raw));
+  btn.disabled = false; btn.textContent = 'Next →';
+  if (!cfg) { err.textContent = `No class found for "${raw}". Check with your teacher.`; return; }
   A.code = raw; A.className = cfg.className;
   err.textContent = '';
   document.getElementById('sname-class-label').textContent = 'Class: ' + cfg.className;
@@ -286,7 +384,7 @@ function sCheckCode() {
   setTimeout(() => document.getElementById('i-sname').focus(), 80);
 }
 
-/* ── Student: submit name ── */
+// ── Student: submit name ──
 function sEnter() {
   const n = document.getElementById('i-sname').value.trim();
   const err = document.getElementById('e-sname');
@@ -296,37 +394,41 @@ function sEnter() {
   document.getElementById('smain-class').textContent = A.className;
   document.getElementById('smain-name').textContent = n;
   go('s-smain');
-  poll(renderStudent);
+  startPoll(renderStudent);
   renderStudent();
 }
 
 function sLogout() {
-  Object.assign(A, { code:null, className:null, name:null });
+  // Remove from queue if in it
+  if (A.code && A.name) sLeave();
+  Object.assign(A, { code: null, className: null, name: null });
   stopPoll();
   document.getElementById('i-sname').value = '';
   document.getElementById('i-scode').value = '';
   go('s-land');
 }
 
-/* ── Student: join / leave ── */
-function sJoin() {
-  const q = getQ(A.code);
-  if (!q.find(x => x.name.toLowerCase()===A.name.toLowerCase())) {
-    q.push({ name: A.name, ts: Date.now() });
-    setQ(A.code, q);
+// ── Student: join / leave ──
+async function sJoin() {
+  const q = await getQueue(A.code);
+  const already = q.find(x => x.name.toLowerCase() === A.name.toLowerCase());
+  if (!already) {
+    await fbPush(qPath(A.code), { name: A.name, ts: Date.now() });
   }
   renderStudent();
 }
 
-function sLeave() {
-  setQ(A.code, getQ(A.code).filter(x => x.name.toLowerCase()!==A.name.toLowerCase()));
+async function sLeave() {
+  const q = await getQueue(A.code);
+  const entry = q.find(x => x.name.toLowerCase() === A.name.toLowerCase());
+  if (entry) await fbDelete(`${qPath(A.code)}/${entry._key}`);
   renderStudent();
 }
 
-/* ── Student: render ── */
-function renderStudent() {
-  const q = getQ(A.code);
-  const idx = q.findIndex(x => x.name.toLowerCase()===A.name.toLowerCase());
+// ── Student: render ──
+async function renderStudent() {
+  const q = await getQueue(A.code);
+  const idx = q.findIndex(x => x.name.toLowerCase() === A.name.toLowerCase());
   const inQ = idx !== -1;
   const sb = document.getElementById('s-status');
   const pi = document.getElementById('s-pos');
@@ -334,11 +436,11 @@ function renderStudent() {
   const lb = document.getElementById('s-leave');
 
   if (inQ) {
-    sb.className = idx===0 ? 'status-bar s-next' : 'status-bar s-waiting';
-    sb.textContent = idx===0 ? "🎉 You're next! Get ready." : "⏳ You're in the queue";
+    sb.className = idx === 0 ? 'status-bar s-next' : 'status-bar s-waiting';
+    sb.textContent = idx === 0 ? "🎉 You're next! Get ready." : "⏳ You're in the queue";
     pi.style.display = 'block';
-    document.getElementById('s-pos-n').textContent = idx===0 ? '🎉' : '#'+(idx+1);
-    document.getElementById('s-pos-t').textContent = idx===0 ? "You're next!" : ' of '+q.length+' in line';
+    document.getElementById('s-pos-n').textContent = idx === 0 ? '🎉' : '#' + (idx + 1);
+    document.getElementById('s-pos-t').textContent = idx === 0 ? " You're next!" : ' of ' + q.length + ' in line';
     jb.style.display = 'none'; lb.style.display = 'block';
   } else {
     sb.className = 'status-bar s-idle';
@@ -349,29 +451,32 @@ function renderStudent() {
 
   document.getElementById('s-count').textContent = q.length;
   const el = document.getElementById('s-list');
+  if (!q.length) { el.innerHTML = '<div class="empty">✅ Queue is empty — no wait!</div>'; return; }
 
-  if (!q.length) { el.innerHTML='<div class="empty">✅ Queue is empty — no wait!</div>'; return; }
-
-  el.innerHTML = q.map((item,i) => {
-    const isYou = item.name.toLowerCase()===A.name.toLowerCase();
-    return `<div class="queue-item ${i===0?'first':''}">
-      <span class="q-num">${i+1}</span>
+  el.innerHTML = q.map((item, i) => {
+    const isYou = item.name.toLowerCase() === A.name.toLowerCase();
+    return `<div class="queue-item ${i === 0 ? 'first' : ''}">
+      <span class="q-num">${i + 1}</span>
       <span class="q-name">${esc(item.name)}</span>
-      ${i===0 ? '<span class="badge badge-next">Next</span>' : ''}
-      ${isYou&&i>0 ? '<span class="badge badge-you">You</span>' : ''}
+      ${i === 0 ? '<span class="badge badge-next">Next</span>' : ''}
+      ${isYou && i > 0 ? '<span class="badge badge-you">You</span>' : ''}
       <span class="q-time">${timeAgo(item.ts)}</span>
     </div>`;
   }).join('');
 }
 
-/* ── Teacher: login ── */
-function tLogin() {
+// ── Teacher: login ──
+async function tLogin() {
   const code = document.getElementById('i-tcode').value.trim().toUpperCase();
   const pass = document.getElementById('i-tpass').value;
   const err  = document.getElementById('e-tlogin');
   if (!code) { err.textContent = 'Enter your class code.'; return; }
   if (!pass) { err.textContent = 'Enter your passcode.'; return; }
-  const cfg = getCfg(code);
+  if (!FB_OK) { err.textContent = 'Firebase is not configured. See setup instructions in the HTML file.'; return; }
+  const btn = document.querySelector('#s-tlogin .btn-primary');
+  btn.disabled = true; btn.textContent = 'Checking…';
+  const cfg = await fbGet(cfgPath(code));
+  btn.disabled = false; btn.textContent = 'Enter Dashboard';
   if (!cfg)            { err.textContent = `No class found for "${code}". Set up your class first.`; return; }
   if (cfg.passcode !== pass) { err.textContent = 'Wrong passcode.'; return; }
   err.textContent = '';
@@ -379,12 +484,12 @@ function tLogin() {
   document.getElementById('t-classname').textContent = cfg.className;
   document.getElementById('t-codebox').textContent = code;
   go('s-tdash');
-  poll(renderTeacher);
+  startPoll(renderTeacher);
   renderTeacher();
 }
 
-/* ── Teacher: setup ── */
-function tSetup() {
+// ── Teacher: setup ──
+async function tSetup() {
   const cn   = document.getElementById('i-tclassname').value.trim();
   const code = document.getElementById('i-tclasscode').value.trim().toUpperCase();
   const p1   = document.getElementById('i-tpass1').value;
@@ -394,24 +499,32 @@ function tSetup() {
   if (!code) { err.textContent = 'Enter a class code.'; return; }
   if (!/^[A-Z0-9]{2,10}$/.test(code)) { err.textContent = 'Code must be 2–10 letters/numbers, no spaces.'; return; }
   if (!p1)   { err.textContent = 'Choose a passcode.'; return; }
-  if (p1!==p2){ err.textContent = "Passcodes don't match."; return; }
-  setCfg(code, { className: cn, passcode: p1 });
+  if (p1 !== p2) { err.textContent = "Passcodes don't match."; return; }
+  if (!FB_OK) { err.textContent = 'Firebase is not configured yet. See setup instructions in the HTML file.'; return; }
+  const btn = document.querySelector('#s-tsetup .btn-primary');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  await fbSet(cfgPath(code), { className: cn, passcode: p1 });
+  btn.disabled = false; btn.textContent = 'Create Class →';
   err.textContent = '';
   document.getElementById('i-tcode').value = code;
   document.getElementById('i-tpass').value = p1;
   go('s-tlogin');
-  setTimeout(() => alert(`✅ Class "${cn}" created!\n\nStudent class code: ${code}\n\nYou're ready to log in.`), 80);
+  setTimeout(() => alert(`✅ Class "${cn}" created!\n\nStudent class code: ${code}\n\nYou can now log in.`), 80);
 }
 
-/* ── Teacher: actions ── */
-function tRemove(name) {
-  setQ(A.code, getQ(A.code).filter(x => x.name !== name));
+// ── Teacher: remove one student ──
+async function tRemove(key) {
+  await fbDelete(`${qPath(A.code)}/${key}`);
   renderTeacher();
 }
-function tClearAll() {
+
+// ── Teacher: clear all ──
+async function tClearAll() {
   if (!confirm('Clear the entire queue?')) return;
-  setQ(A.code, []); renderTeacher();
+  await fbSet(qPath(A.code), null);
+  renderTeacher();
 }
+
 function tLogout() {
   A.teacher = false; A.code = null; stopPoll();
   document.getElementById('i-tpass').value = '';
@@ -419,9 +532,9 @@ function tLogout() {
   go('s-land');
 }
 
-/* ── Teacher: render ── */
-function renderTeacher() {
-  const q = getQ(A.code);
+// ── Teacher: render ──
+async function renderTeacher() {
+  const q = await getQueue(A.code);
   document.getElementById('t-count').textContent = q.length;
   const banner = document.getElementById('t-banner');
   if (q.length) {
@@ -431,25 +544,20 @@ function renderTeacher() {
     banner.style.display = 'none';
   }
   const el = document.getElementById('t-list');
-  if (!q.length) { el.innerHTML='<div class="empty">✅ Queue is empty. All students are set!</div>'; return; }
-  el.innerHTML = q.map((item,i) => `
-    <div class="teacher-item ${i===0?'first':''}">
-      <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);min-width:20px">${i+1}</span>
+  if (!q.length) { el.innerHTML = '<div class="empty">✅ Queue is empty. All students are set!</div>'; return; }
+
+  el.innerHTML = q.map((item, i) => `
+    <div class="teacher-item ${i === 0 ? 'first' : ''}">
+      <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);min-width:20px">${i + 1}</span>
       <span class="tname">${esc(item.name)}</span>
       <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">${timeAgo(item.ts)}</span>
-      <button class="done-btn" onclick="tRemove(${JSON.stringify(item.name)})">Done ✓</button>
+      <button class="done-btn" onclick="tRemove('${item._key}')">Done ✓</button>
     </div>`).join('');
 }
 
-/* ── Polling ── */
-function poll(fn) { stopPoll(); A.iv = setInterval(fn, 2500); }
+// ── Polling (every 3s) ──
+function startPoll(fn) { stopPoll(); fn(); A.iv = setInterval(fn, 3000); }
 function stopPoll() { if (A.iv) { clearInterval(A.iv); A.iv = null; } }
-
-/* Cross-tab sync via storage event */
-window.addEventListener('storage', () => {
-  if (A.teacher) renderTeacher();
-  else if (A.name) renderStudent();
-});
 </script>
 </body>
 </html>
