@@ -229,7 +229,7 @@ var fbApp=initializeApp(cfg);
 var auth=getAuth(fbApp);
 var db=getDatabase(fbApp);
 var prov=new GoogleAuthProvider();
-var me=null;var unsubs={};var pvCode=null;var tick=null;
+var me=null;var pendingUser=null;var unsubs={};var pvCode=null;var tick=null;
 
 function go(id){document.querySelectorAll(".section").forEach(function(s){s.classList.remove("active");});document.getElementById(id).classList.add("active");}
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
@@ -278,6 +278,7 @@ onAuthStateChanged(auth,function(user){
           go("s-portal");loadClasses();startTick();
         }else{
           // Not authorized — show request page immediately, no more Firebase reads
+          pendingUser=user;
           document.getElementById("unauth-email").textContent=user.email;
           var reqKey="hq_req_"+user.uid;
           if(localStorage.getItem(reqKey)){
@@ -290,8 +291,8 @@ onAuthStateChanged(auth,function(user){
           go("s-unauth");
         }
       }).catch(function(e){
-        // If email list read fails, still show unauth page rather than hanging
         console.error("Email list read failed:",e);
+        pendingUser=user;
         document.getElementById("unauth-email").textContent=user.email;
         document.getElementById("request-section").style.display="block";
         document.getElementById("request-sent").style.display="none";
@@ -299,6 +300,7 @@ onAuthStateChanged(auth,function(user){
       });
     }).catch(function(e){
       console.error("Admin check failed:",e);
+      pendingUser=user;
       document.getElementById("unauth-email").textContent=user.email;
       document.getElementById("request-section").style.display="block";
       document.getElementById("request-sent").style.display="none";
@@ -310,15 +312,16 @@ onAuthStateChanged(auth,function(user){
 });
 
 window.submitRequest=function(){
-  if(!me)return;
+  var u=pendingUser||me;
+  if(!u){alert("Please sign in first.");return;}
   push(ref(db,"adminConfig/accessRequests"),{
-    email:me.email,
-    displayName:me.displayName||"",
-    uid:me.uid,
+    email:u.email,
+    displayName:u.displayName||"",
+    uid:u.uid,
     requestedAt:Date.now(),
     status:"pending"
   }).then(function(){
-    localStorage.setItem("hq_requested_"+me.uid,"1");
+    localStorage.setItem("hq_req_"+u.uid,"1");
     document.getElementById("request-section").style.display="none";
     document.getElementById("request-sent").style.display="block";
   }).catch(function(e){alert("Error submitting request: "+e.message);});
