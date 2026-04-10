@@ -74,9 +74,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
 #projected{display:none;position:fixed;inset:0;z-index:1000;background:#0f172a;color:#fff;font-family:'DM Sans',sans-serif;flex-direction:column}
 #projected.visible{display:flex}
 .pv-header{display:flex;align-items:center;justify-content:space-between;padding:24px 40px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
-.pv-title{font-size:22px;font-weight:600;opacity:.7;letter-spacing:-.3px}
-.pv-code{font-family:'DM Mono',monospace;font-size:15px;background:rgba(255,255,255,.08);border-radius:8px;padding:6px 14px;letter-spacing:.12em;opacity:.8}
-.pv-close{background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:8px;padding:8px 16px;font-family:inherit;font-size:13px;cursor:pointer;opacity:.7}
+.pv-title{font-size:32px;font-weight:600;opacity:.9;letter-spacing:-.5px}
+.pv-code{font-family:'DM Mono',monospace;font-size:26px;font-weight:600;background:rgba(255,255,255,.12);border-radius:10px;padding:8px 20px;letter-spacing:.18em;opacity:.95}
+.pv-close{background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:16px;cursor:pointer;opacity:.7}
 .pv-close:hover{opacity:1;background:rgba(255,255,255,.15)}
 .pv-body{flex:1;display:flex;flex-direction:column;padding:32px 40px;overflow:hidden}
 .pv-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:.35}
@@ -93,9 +93,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .pv-item-num{font-family:'DM Mono',monospace;font-size:16px;opacity:.35;min-width:32px;font-weight:500}
 .pv-item-name{flex:1;font-size:24px;font-weight:500}
 .pv-item-time{font-size:13px;opacity:.4;font-family:'DM Mono',monospace}
-.pv-item-done{background:rgba(26,122,74,.25);color:#6ee7b7;border:1px solid rgba(110,231,183,.2);border-radius:8px;padding:6px 14px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;flex-shrink:0}
+.pv-next-done{background:rgba(26,122,74,.3);color:#6ee7b7;border:1px solid rgba(110,231,183,.25);border-radius:14px;padding:16px 32px;font-size:22px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0;transition:background .15s}.pv-next-done:hover{background:rgba(26,122,74,.5)}.pv-item-done{background:rgba(26,122,74,.25);color:#6ee7b7;border:1px solid rgba(110,231,183,.2);border-radius:8px;padding:6px 14px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;flex-shrink:0}
 .pv-item-done:hover{background:rgba(26,122,74,.4)}
-.pv-count{font-size:15px;font-weight:600;background:rgba(255,255,255,.08);border-radius:99px;padding:4px 14px;opacity:.7;margin-left:auto}
+.pv-count{font-size:18px;font-weight:600;background:rgba(255,255,255,.08);border-radius:99px;padding:6px 18px;opacity:.8;margin-left:auto}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(45,91,227,.4)}50%{box-shadow:0 0 0 12px rgba(45,91,227,0)}}
 .pv-next{animation:pulse 2.5s ease infinite}
 .nav-links{display:flex;gap:16px;justify-content:center;margin-top:8px;font-size:13px}
@@ -195,7 +195,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <div class="pv-header">
     <div class="pv-title" id="pv-title">Class Queue</div>
     <div style="display:flex;align-items:center;gap:12px">
-      <div style="font-size:13px;opacity:.5">Join with code:</div>
+      <div style="font-size:18px;opacity:.6;font-weight:500">Join with code:</div>
       <div class="pv-code" id="pv-code"></div>
       <div class="pv-count" id="pv-count">0 waiting</div>
       <button class="pv-close" onclick="closeProjected()">&#10005; Close</button>
@@ -205,11 +205,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
     <div class="pv-empty" id="pv-empty"><div class="pv-empty-icon">✅</div><div class="pv-empty-text">Queue is empty — all caught up!</div></div>
     <div id="pv-next" class="pv-next" style="display:none">
       <div class="pv-next-icon">👋</div>
-      <div>
+      <div style="flex:1">
         <div class="pv-next-lbl">Next up</div>
         <div class="pv-next-name" id="pv-next-name"></div>
         <div class="pv-next-wait" id="pv-next-wait"></div>
       </div>
+      <button class="pv-next-done" id="pv-next-done" onclick="doneNext()">Done &#10003;</button>
     </div>
     <div id="pv-rest" style="display:none">
       <div class="pv-rest-lbl">Also waiting</div>
@@ -391,6 +392,10 @@ function renderQ(code,q){
 }
 
 window.doneStudent=function(code,key){remove(ref(db,"classes/"+code+"/queue/"+key));};
+window.doneNext=function(){
+  var key=document.getElementById("pv-next-done").getAttribute("data-key");
+  if(pvCode&&key)remove(ref(db,"classes/"+pvCode+"/queue/"+key));
+};
 window.clearQ=function(code){if(!confirm("Clear the entire queue for this class?"))return;set(ref(db,"classes/"+code+"/queue"),null);};
 
 window.openProjected=function(code,name){
@@ -411,6 +416,7 @@ function renderProjected(q){
   emptyEl.style.display="none";nextEl.style.display="flex";
   document.getElementById("pv-next-name").textContent=q[0].name;
   var nw=document.getElementById("pv-next-wait");nw.setAttribute("data-ts",q[0].ts);nw.textContent=ago(q[0].ts);
+  document.getElementById("pv-next-done").setAttribute("data-key",q[0]._key);
   if(q.length>1){
     restEl.style.display="block";var html="";
     for(var i=1;i<q.length;i++){var item=q[i];html+='<div class="pv-item"><span class="pv-item-num">'+(i+1)+'</span><span class="pv-item-name">'+esc(item.name)+'</span><span class="pv-item-time" data-ts="'+item.ts+'">'+ago(item.ts)+'</span><button class="pv-item-done" onclick="doneStudent(\''+pvCode+'\',\''+item._key+'\')">Done &#10003;</button></div>';}
