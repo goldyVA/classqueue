@@ -251,47 +251,58 @@ window.doSignOut=function(){signOut(auth);};
 
 onAuthStateChanged(auth,function(user){
   if(user){
-    Promise.all([
-      get(ref(db,"adminConfig/authorizedEmails")),
-      get(ref(db,"adminConfig/admins/"+user.uid))
-    ]).then(function(results){
-      var emailSnap=results[0];var adminSnap=results[1];
-      var allowed=false;
-      if(adminSnap.exists())allowed=true;
-      if(!allowed&&emailSnap.exists()){
-        Object.values(emailSnap.val()).forEach(function(v){
-          var stored=typeof v==="object"?v.email:v;
-          if(stored&&stored.toLowerCase()===user.email.toLowerCase())allowed=true;
-        });
-      }
-      if(!allowed){
-        // Show unauthorized screen with request option
-        document.getElementById("unauth-email").textContent=user.email;
-        // Check if already requested
-        get(ref(db,"adminConfig/accessRequests")).then(function(reqSnap){
-          var alreadyRequested=false;
-          if(reqSnap.exists()){
-            Object.values(reqSnap.val()).forEach(function(v){
-              if(v.email&&v.email.toLowerCase()===user.email.toLowerCase()&&v.status==="pending")alreadyRequested=true;
-            });
-          }
-          if(alreadyRequested){
-            document.getElementById("request-section").style.display="none";
-            document.getElementById("request-sent").style.display="block";
-          }
-          go("s-unauth");
-        });
+    // Check admin first (single read, low risk of failure)
+    get(ref(db,"adminConfig/admins/"+user.uid)).then(function(adminSnap){
+      if(adminSnap.exists()){
+        // Admin — go straight to portal
+        me=user;
+        document.getElementById("user-name").textContent=user.displayName||user.email;
+        if(user.photoURL){document.getElementById("user-photo").src=user.photoURL;document.getElementById("user-avatar").style.display="block";}
+        document.getElementById("admin-link").style.display="inline-flex";
+        go("s-portal");loadClasses();startTick();
         return;
       }
-      me=user;
-      document.getElementById("user-name").textContent=user.displayName||user.email;
-      if(user.photoURL){document.getElementById("user-photo").src=user.photoURL;document.getElementById("user-avatar").style.display="block";}
-      if(user.email.toLowerCase()===ADMIN_EMAIL.toLowerCase()){document.getElementById("admin-link").style.display="inline-flex";}
-      go("s-portal");loadClasses();startTick();
+      // Not admin — check authorized emails
+      get(ref(db,"adminConfig/authorizedEmails")).then(function(emailSnap){
+        var allowed=false;
+        if(emailSnap.exists()){
+          Object.values(emailSnap.val()).forEach(function(v){
+            var stored=typeof v==="object"?v.email:v;
+            if(stored&&stored.toLowerCase()===user.email.toLowerCase())allowed=true;
+          });
+        }
+        if(allowed){
+          me=user;
+          document.getElementById("user-name").textContent=user.displayName||user.email;
+          if(user.photoURL){document.getElementById("user-photo").src=user.photoURL;document.getElementById("user-avatar").style.display="block";}
+          go("s-portal");loadClasses();startTick();
+        }else{
+          // Not authorized — show request page immediately, no more Firebase reads
+          document.getElementById("unauth-email").textContent=user.email;
+          var reqKey="hq_req_"+user.uid;
+          if(localStorage.getItem(reqKey)){
+            document.getElementById("request-section").style.display="none";
+            document.getElementById("request-sent").style.display="block";
+          }else{
+            document.getElementById("request-section").style.display="block";
+            document.getElementById("request-sent").style.display="none";
+          }
+          go("s-unauth");
+        }
+      }).catch(function(e){
+        // If email list read fails, still show unauth page rather than hanging
+        console.error("Email list read failed:",e);
+        document.getElementById("unauth-email").textContent=user.email;
+        document.getElementById("request-section").style.display="block";
+        document.getElementById("request-sent").style.display="none";
+        go("s-unauth");
+      });
     }).catch(function(e){
-      console.error("Auth check failed:",e);
-      document.getElementById("loading-msg").textContent="Error: "+e.message+". Try refreshing.";
-      go("s-loading");
+      console.error("Admin check failed:",e);
+      document.getElementById("unauth-email").textContent=user.email;
+      document.getElementById("request-section").style.display="block";
+      document.getElementById("request-sent").style.display="none";
+      go("s-unauth");
     });
   }else{
     me=null;Object.values(unsubs).forEach(function(u){if(u)u();});unsubs={};closeProjected();stopTick();go("s-login");
