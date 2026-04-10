@@ -220,7 +220,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getDatabase, ref, get, set, push, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const ADMIN_EMAIL="steven.goldburg@gmail.com";
@@ -231,11 +231,6 @@ var db=getDatabase(fbApp);
 var prov=new GoogleAuthProvider();
 var me=null;var unsubs={};var pvCode=null;var tick=null;
 
-// Handle redirect sign-in result on page load
-getRedirectResult(auth).catch(function(e){
-  if(e.code!=="auth/no-current-user")console.error("Redirect result error:",e);
-});
-
 function go(id){document.querySelectorAll(".section").forEach(function(s){s.classList.remove("active");});document.getElementById(id).classList.add("active");}
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function ago(ts){var s=Math.floor((Date.now()-ts)/1000);if(s<60)return "waiting "+s+"s";var m=Math.floor(s/60);if(m<60)return "waiting "+m+"m";return "waiting "+Math.floor(m/60)+"h";}
@@ -245,8 +240,12 @@ function stopTick(){if(tick){clearInterval(tick);tick=null;}}
 
 window.doSignIn=function(){
   var btn=document.getElementById("signin-btn");
-  btn.disabled=true;btn.textContent="Redirecting to Google...";
-  signInWithRedirect(auth,prov);
+  btn.disabled=true;btn.textContent="Opening sign-in...";
+  signInWithPopup(auth,prov).catch(function(e){
+    console.error(e);
+    btn.disabled=false;
+    btn.textContent="Sign in with Google";
+  });
 };
 window.doSignOut=function(){signOut(auth);};
 
